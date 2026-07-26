@@ -8,7 +8,4 @@ plugins:
       cleanup: true
       repos:
         - section: 'HomeLab'
-          import_url: 'https://github.com/aldobettega/HomeLab'
-
-nav:
-  - Home: index.md
+          import_url: 'https://github.com/aldobettega/HomeLab?branch=main'
