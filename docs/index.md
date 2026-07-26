@@ -1,3 +1,3 @@
-# Aldo Bettega
+## Aldo Bettega
 
 Benvenuti sul mio portfolio
