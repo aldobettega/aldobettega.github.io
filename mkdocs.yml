@@ -1,2 +1,16 @@
 site_name: My Docs
-theme: simple-blog
+theme: 
+  name: windmill-dark
+
+plugins:
+  - search
+  - multirepo:
+      cleanup: true
+      repos:
+        - section: 'HomeLab'
+          import_url: 'https://github.com/aldobettega/HomeLab'
+
+nav:
+  - Home: index.md
+  - Progetti:
+    - HomeLab: progetti/homelab/overview.md

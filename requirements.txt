@@ -1,2 +1,4 @@
 mkdocs-material
 mkdocs-simple-blog
+mkdocs-windmill-dark
+mkdocs-multirepo-plugin

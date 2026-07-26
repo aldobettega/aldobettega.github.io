@@ -1,0 +1,1 @@
+In this project i want to document all my journey into the construction of my personal homelab. I hope this will be helpful for someone.
