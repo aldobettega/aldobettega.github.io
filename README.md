@@ -2,12 +2,10 @@
 
 # Aldo Bettega - Portfolio
 
-Benvenuto nel repository del mio portfolio personale 
+Welcome to the repository of my personal portfolio, here you can find my personal projects, my docs-as-code documentation and my tech journey.
 
-Questo sito ha l'intento di essere una vetrina dei miei progetti personali, interessi personali.
+**[Portfolio website](https://aldobettega.github.io)**
 
-👉 **[VISITA IL SITO UFFICIALE QUI](https://aldobettega.github.io)** 👈
-
-## 🛠️ Tecnologie Utilizzate
-* **Generatore Statico:** [MkDocs](https://www.mkdocs.org/)
+## Technology
+* **Static generator:** [MkDocs](https://www.mkdocs.org/)
 * **Hosting & CI/CD:** GitHub Pages + GitHub Actions
