@@ -1,3 +1,5 @@
+[![Deploy MkDocs](https://github.com/aldobettega/aldobettega.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/aldobettega/aldobettega.github.io/actions/workflows/deploy.yml)
+
 # Aldo Bettega - Portfolio
 
 Benvenuto nel repository del mio portfolio personale 
