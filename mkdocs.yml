@@ -12,5 +12,3 @@ plugins:
 
 nav:
   - Home: index.md
-  - Progetti:
-    - HomeLab: progetti/homelab/overview.md
