@@ -2,6 +2,9 @@ site_name: My Docs
 theme: 
   name: windmill-dark
 
+markdown_extensions:
+  - attr_list
+
 plugins:
   - search
   - multirepo:
