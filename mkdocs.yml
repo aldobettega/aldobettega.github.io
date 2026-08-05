@@ -13,4 +13,4 @@ plugins:
         - section: 'HomeLab'
           import_url: 'https://github.com/aldobettega/HomeLab?branch=main'
         - section: 'HashIdentifier'
-          import_url: 'https://github.com/aldobettega/HashIdentifier/tree/main/Documentazione?branch=main'
+          import_url: 'https://github.com/aldobettega/HashIdentifier?branch=main&docs_dir=Documentazione/docs/*&config=Documentazione/mkdocs.yml'
