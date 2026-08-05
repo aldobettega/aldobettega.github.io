@@ -12,3 +12,5 @@ plugins:
       repos:
         - section: 'HomeLab'
           import_url: 'https://github.com/aldobettega/HomeLab?branch=main'
+        - section: 'HashIdentifier'
+          import_url: 'https://github.com/aldobettega/HashIdentifier/tree/main/Documentazione?branch=main'
