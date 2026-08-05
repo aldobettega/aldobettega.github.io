@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Roadmap - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\ud83d\uded2 1. Roadmap Hardware: L\u0027approccio a strati (Scale-Out)", url: "#_top", children: [
+          ]},
+          {title: "\ud83d\udcbc 2. I Progetti \"Curriculum-Killer\" (Networking \u0026amp; Cybersecurity)", url: "#2-i-progetti-curriculum-killer-networking-cybersecurity", children: [
+          ]},
+          {title: "\ud83c\udfae 3. I Progetti \"Life-Improver\" (Belli, Utili e Divertenti)", url: "#3-i-progetti-life-improver-belli-utili-e-divertenti", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../troubleshooting/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../troubleshooting/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../" class="btn btn-xs btn-link">
+        Overview
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h3 id="1-roadmap-hardware-lapproccio-a-strati-scale-out">🛒 1. Roadmap Hardware: L'approccio a strati (Scale-Out)</h3>
+<p>Ogni strato si aggiunge al precedente, senza mai sostituirlo.</p>
+<p><strong>Strato 1 (La Fondamenta): Il Nodo Compute (Virtualizzazione)</strong></p>
+<ul>
+<li><strong>Cosa comprare:</strong><ul>
+<li><strong>Mini PC</strong></li>
+</ul>
+</li>
+<li><strong>Requisiti:</strong><ul>
+<li>Processore Intel N100 (nuovo) oppure Intel Core i5 dall'8a generazione in su (usato, come i Lenovo ThinkCentre M720q o i Dell OptiPlex Micro)</li>
+<li>Minimo <strong>16GB di RAM</strong> (meglio 32GB)</li>
+<li>un SSD NVMe da 500GB.</li>
+<li>Consumo: 10-15 Watt.</li>
+</ul>
+</li>
+<li><strong>Costo stimato:</strong> 150€ - 250€.</li>
+<li><strong>Cosa ci fai:</strong> Qui installerai <strong>Proxmox</strong>. Sarà il cervello del tuo homelab, dove farai girare le tue macchine virtuali e i container Docker.</li>
+</ul>
+<p><strong>Strato 2 (Il Networking): Switch Managed ed eventuale Firewall Fisico</strong></p>
+<ul>
+<li><strong>Cosa comprare:</strong><ul>
+<li>Uno <strong>Switch Layer 2/3 Managed</strong> a 5 o 8 porte (es. TP-Link TL-SG105E o simili).</li>
+<li>Un mini PC fanless con 4 porte di rete fisiche</li>
+</ul>
+</li>
+<li><strong>Costo stimato:</strong><ul>
+<li>30€ per lo switch</li>
+<li>150€ per il router/firewall fisico.</li>
+</ul>
+</li>
+<li><strong>Cosa ci fai:</strong> l<ul>
+<li>lo switch ti servirà per dividere le VLAN fisicamente</li>
+<li>Il PC con le 4 porte diventerà il tuo <strong>Router pfSense/OPNsense</strong> bare-metal, gestendo la sicurezza di tutta la tua casa.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Strato 3 (I Dati): Il NAS (Network Attached Storage)</strong></p>
+<ul>
+<li><strong>Cosa comprare:</strong><ul>
+<li>Un NAS pre-assemblato (come un Synology a 2 o 4 bay) oppure un PC custom in cui inserire dischi meccanici molto capienti (IronWolf o WD Red).</li>
+</ul>
+</li>
+<li><strong>Costo stimato:</strong><ul>
+<li>Dai 200€ in su, dipende dalla capienza dei dischi.</li>
+</ul>
+</li>
+<li><strong>Cosa ci fai:</strong><ul>
+<li>Lo usi puramente per lo storage (TrueNAS o Unraid). Farà i backup automatici del tuo Mini PC (Strato 1) e archivierà i tuoi film e documenti.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="2-i-progetti-curriculum-killer-networking-cybersecurity">💼 2. I Progetti "Curriculum-Killer" (Networking &amp; Cybersecurity)</h3>
+<ul>
+<li><strong>Segmentazione di Rete Avanzata (VLANs &amp; Firewalling):</strong><ul>
+<li>Usando pfSense o OPNsense, crea regole (ACL) che isolano i dispositivi insicuri (telecamere, smart TV) in una VLAN separata (IoT). Dimostra che il traffico non può passare verso la tua rete principale, ma che tu puoi raggiungere loro.</li>
+</ul>
+</li>
+<li><strong>Reverse Proxy &amp; Identity Provider (SSO):</strong><ul>
+<li>Esponi un servizio su Internet in modo sicuro. Invece di aprire porte a caso sul router, usa <strong>Nginx Proxy Manager</strong> o <strong>Traefik</strong>. Aggiungici un sistema di autenticazione come <strong>Authelia</strong> o <strong>Authentik</strong>: prima di accedere a una tua app, l'utente viene bloccato da una pagina di login con Autenticazione a Due Fattori (2FA).</li>
+</ul>
+</li>
+<li><strong>Wazuh (SIEM) o Intrusion Detection System (IDS):</strong><ul>
+<li>Installa Wazuh (un sistema di monitoraggio per la cybersecurity) o attiva Suricata sul tuo firewall. Fai un attacco simulato e fai uno screenshot dell'allarme generato.</li>
+</ul>
+</li>
+<li><strong>Infrastructure as Code (IaC) con Ansible:</strong><ul>
+<li>Invece di installare i programmi a mano sui tuoi server Linux, scrivi uno "script" Ansible (un file YAML) che si collega via SSH e configura il server in totale autonomia.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="3-i-progetti-life-improver-belli-utili-e-divertenti">🎮 3. I Progetti "Life-Improver" (Belli, Utili e Divertenti)</h3>
+<p>Questi sono i servizi che, una volta installati, cambieranno in meglio la tua vita digitale quotidiana e ti daranno tantissima soddisfazione.</p>
+<ul>
+<li><strong>Pi-hole o AdGuard Home:</strong> <ul>
+<li>instradare tutto il traffico DNS della tua rete qui dentro farà sparire magicamente la pubblicità dai siti web e dalle app</li>
+</ul>
+</li>
+<li><strong>WireGuard (VPN Personale):</strong><ul>
+<li>Accendi la VPN sul telefono e, magicamente, la tua connessione viene criptata fino a casa tua, navigando in sicurezza</li>
+</ul>
+</li>
+<li><strong>Nextcloud:</strong><ul>
+<li>Il tuo Google Drive / iCloud personale. Sincronizza automaticamente le foto dal tuo smartphone, ospita i tuoi documenti e non ha abbonamenti mensili. Hai il controllo totale dei tuoi dati (Privacy).</li>
+</ul>
+</li>
+<li><strong>Jellyfin o Plex:</strong><ul>
+<li>Il tuo Netflix personale. Scarichi i tuoi film o serie TV sul server e li guardi in streaming comodamente dalla smart TV del salotto, con locandine scaricate in automatico, sottotitoli e suddivisione per stagioni.</li>
+</ul>
+</li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../troubleshooting/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../troubleshooting/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../" class="btn btn-xs btn-link">
+        Overview
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/roadmap/roadmap.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

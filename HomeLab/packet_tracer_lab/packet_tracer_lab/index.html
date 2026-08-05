@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Overview - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Overview", url: "#_top", children: [
+          ]},
+          {title: "Initial Setup", url: "#initial-setup", children: [
+          ]},
+          {title: "CLI Commands", url: "#cli-commands", children: [
+              {title: "Base commands", url: "#base-commands" },
+              {title: "IOS switch CLI", url: "#ios-switch-cli" },
+              {title: "IOS router CLI", url: "#ios-router-cli" },
+          ]},
+          {title: "Step by step guide", url: "#step-by-step-guide", children: [
+              {title: "Connect devices", url: "#connect-devices" },
+              {title: "Configure PCs", url: "#configure-pcs" },
+              {title: "Configure switch", url: "#configure-switch" },
+              {title: "Configure router", url: "#configure-router" },
+              {title: "Conclusion", url: "#conclusion" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../roadmap/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../roadmap/" class="btn btn-xs btn-link">
+        Overview
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../notes/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../notes/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="overview">Overview</h1>
+<p>In this example I setup a simple network, trying to figure out what i can do before setupping my actual homelab and how to do it virtually with cisco packet tracer.</p>
+<h1 id="initial-setup">Initial Setup</h1>
+<p>The item i chose were:</p>
+<p><img alt="devices" src="../img/image1.png" width="400" /></p>
+<ul>
+<li>Two Pcs</li>
+<li>2960-24TT switch</li>
+<li>1941 router</li>
+</ul>
+<p>I chose those devices becouse they have GigabitEthernet (1 Gbps at least) port by default, instead slower FastEthernet ports (100 Mbps)</p>
+<p>With those item we will create a simple network between two machines, which we will divde into two VLANs</p>
+<ul>
+<li>VLAN10: the computer desktop vlan</li>
+<li>VLAN20: the server vlan</li>
+</ul>
+<p>We will implement Router on a stick network, also knwon as a one-armed router, a network where the router is connected to multiple VLAN through only one phisical interface thanks to a switch connected with trunk connection.</p>
+<p><img alt="Router on a stick" src="../img/router_on_a_stick.png" width="400" /></p>
+<p>In a LAN network without segmentation all devices are connected and can view each others, so we have to create isolated network using VLANs (one network for the servers, one network for desktop devices and one for IoT devices for example).</p>
+<p>The Switch is a layer 2 network device that can separate network into VLANs and the Router is a layer 3 network device that can make communicate VLAN10 with VLAN20.</p>
+<h1 id="cli-commands">CLI Commands</h1>
+<h2 id="base-commands">Base commands</h2>
+<ul>
+<li>
+<p><code>enable</code>: change from user mode (&gt;) to privileged mode (#)</p>
+</li>
+<li>
+<p><code>configure terminal</code>: enter the global configuration (<code>(config)#</code>), now we can configure</p>
+</li>
+<li>
+<p><code>end</code>: exit the configuration</p>
+</li>
+<li>
+<p><code>write memory</code>: move the changement to the volatile RAM to the NVRAM (non volatile) (it saves the modification)</p>
+</li>
+</ul>
+<h2 id="ios-switch-cli">IOS switch CLI</h2>
+<ul>
+<li>
+<p><code>vlan x</code>: create a vlan identified with the number x</p>
+</li>
+<li>
+<p><code>name y</code>: assign a textual tag y to the created vlan x</p>
+</li>
+<li>
+<p><code>interface portName portNumber</code>: enter into the contest of the pyhisical port</p>
+</li>
+<li>
+<p><code>switchport mode access</code>: configure the port to receive data from endpoint devices like PCs and being able to receive data only by one device</p>
+</li>
+<li>
+<p><code>switchport access vlan x</code>: insert the port that we are configuring into the vlan x, so the data emitted from the device connected to this port will be labeled with number x</p>
+</li>
+<li>
+<p><code>switchport mode trunk</code>: configure the port to receive data from multiple devices labeled with different tags that represent the vlan and the 802.1Q tag</p>
+</li>
+</ul>
+<h2 id="ios-router-cli">IOS router CLI</h2>
+<ul>
+<li>
+<p><code>no shutdown</code>: the ports are shutdown di default, so we have to disable this</p>
+</li>
+<li>
+<p><code>encapsulation dot1Q x</code>: configure the virtual interface to accept packet from dot1Q standard (802.1Q) labeleb with x number, representing the VLAN</p>
+</li>
+<li>
+<p><code>ip address x</code>: assign ip address x to the interface that is being configured, transformed it into the default gateway to all the devices on that sub-network</p>
+</li>
+</ul>
+<h1 id="step-by-step-guide">Step by step guide</h1>
+<h2 id="connect-devices">Connect devices</h2>
+<p>First, you have to connect devices with the right camble and the right port</p>
+<p>We connect PCs with Copper Straight-Through cable to the FastEthernet0 ports of the switch:</p>
+<ul>
+<li>CLIENT_DESKTOP to FastEthernet0/1</li>
+<li>SERVER_LAB to FastEthernet0/2</li>
+</ul>
+<p>We connect the switch to router with Copper Straight-Through cable:</p>
+<ul>
+<li>GigabitEthernet0/1 of the siwtch to the GigabitEthernet0/0 of the router.</li>
+</ul>
+<p><img alt="cable" src="../img/physical_connection.png" width="800" /></p>
+<h2 id="configure-pcs">Configure PCs</h2>
+<p>We have to assign the network configuration for two PCs, through the ip configuration app</p>
+<p>Client desktop:</p>
+<ul>
+<li>IPv4: 192.168.10.10</li>
+<li>Subnet Mask: 255.255.255.0</li>
+<li>Gateway: 192.168.10.1</li>
+</ul>
+<p>Server lab:</p>
+<ul>
+<li>IPv4: 192.168.20.10</li>
+<li>Subnet Mask: 255.255.255.0</li>
+<li>Gateway: 192.168.20.1</li>
+</ul>
+<p>In this way we orginized the two devices in two different subnet (one on the 10 and one on the 20), and the gateway is conventionally the first device of that network (so .1).</p>
+<h2 id="configure-switch">Configure switch</h2>
+<p>Now we have to:</p>
+<ul>
+<li>create VLANs</li>
+<li>insert devices into them</li>
+<li>connect the router in trunk mode</li>
+</ul>
+<pre><code class="language-bash">
+    enable
+    configure terminal
+
+    vlan 10
+    name CLIENT_DESKTOP
+    exit
+
+    vlan 20
+    name SERVER_LAB
+    exit
+
+    interface fastEthernet 0/1
+    switchport mode access
+    switchport access vlan 10
+    exit
+
+    interface fastEthernet 0/2
+    switchport mode access
+    switchport access vlan 20
+    exit
+
+    interface gigabitEthernet 0/1
+    switchport mode trunk
+    exit
+
+</code></pre>
+<h2 id="configure-router">Configure router</h2>
+<pre><code class="language-bash">
+    enable
+    configure terminal
+
+    interface gigabitEthernet 0/0
+    no shutdown
+    exit
+
+    interface gigabitEthernet 0/0.10
+    encapsulation dot1Q 10
+    ip address 192.168.10.1 255.255.255.0
+    exit
+
+    interface gigabitEthernet 0/0.20
+    encapsulation dot1Q 20
+    ip address 192.168.20.1 255.255.255.0
+    exit
+
+    end
+    write memory
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>Now we can ping the two devices and it should work:</p>
+<p><img alt="ping" src="../img/ping.png" width="700" /></p>
+<p>and the network are working</p>
+<p><img alt="workingNetwork" src="../img/workingNetwork.png" width="500" /></p>
+<p>you can find the working solution on <a href="https://github.com/aldobettega/HomeLab/blob/main/pkt/router_on_a_stick.pkt">router_on_a_stick.pkt</a></p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../roadmap/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../roadmap/" class="btn btn-xs btn-link">
+        Overview
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../notes/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../notes/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/packet_tracer_lab/packet_tracer_lab.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>
