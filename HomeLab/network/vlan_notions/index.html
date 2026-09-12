@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Vlan notions - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Separazione management e server", url: "#_top", children: [
+          ]},
+          {title: "Standard IEEE 802.1Q", url: "#standard-ieee-8021q", children: [
+          ]},
+          {title: "Access port e Trunk port", url: "#access-port-e-trunk-port", children: [
+          ]},
+          {title: "Native vlan", url: "#native-vlan", children: [
+          ]},
+          {title: "Linux bridge", url: "#linux-bridge", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../nginx-proxy/setup/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../nginx-proxy/setup/" class="btn btn-xs btn-link">
+        Setup iniziale
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../network_map/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../network_map/" class="btn btn-xs btn-link">
+        192.168.1.0/24 (WAN / Rete Base Untagged)
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <p>Minipc deve agire da router e da server -&gt; il singolo cavo che lo collega allo switch deve fare:</p>
+<ul>
+<li>WAN: traffico rete della casa</li>
+<li>LAN: traffico isolato dell'homelab
+Si utilizza VLAN tagging per distinguere (802.1Q) -&gt; si configura una porta dello switch collegata a proxmox come <strong>trunk</strong></li>
+</ul>
+<p>Due interfacce di rete:</p>
+<ul>
+<li>virtual WAN: no tag</li>
+<li>virtual LAN: tag con la VLAN dell'homelab -&gt; gateway per tutti i server e acesspoint</li>
+</ul>
+<h1 id="separazione-management-e-server">Separazione management e server</h1>
+<ul>
+<li>
+<p>VLAN 1: rete di casa WAN -&gt; 192.168.1.0/24</p>
+</li>
+<li>
+<p>VLAN 10: management lab -&gt; 10.0.10.0/24</p>
+</li>
+<li>
+<p>VLAN 20: server -&gt; 10.0.20.0/24</p>
+</li>
+<li>
+<p>VLAN 30: client wifi -&gt; 10.0.30.0/24</p>
+</li>
+</ul>
+<p>La creazione di vlan permette di separare logicamente la rete ed istruire il router a permettere classi dispositivi di vlan ad accedere/non accedere ad altre vlan.</p>
+<h1 id="standard-ieee-8021q">Standard IEEE 802.1Q</h1>
+<p>Un normale pacchetto dati è formato da MAC sorgente, MAC destinatario e dati, quando uso le VLAN devo aggiungere 4 byte per il tag VLAN (un numero da 1 a 4094)</p>
+<h1 id="access-port-e-trunk-port">Access port e Trunk port</h1>
+<p>Per far funzionare le VLAN, le porte di uno switch possono comportarsi:</p>
+<ul>
+<li>Access port: si collegano dispositivi "stupidi" -&gt; lo switch prima di dare il dato toglie il tag vlan (rende pacchetto untagged) e quando il dispositivo risponde gli riapplica il tag</li>
+<li>Trunk port: porta per collegare due dispositivi di infrastruttura (switch con proxmox) -&gt; non toglie vlan tag, in questo modo più vlan possono viaggiare sullo stesso cavo fisico.</li>
+</ul>
+<h1 id="native-vlan">Native vlan</h1>
+<p>Dopo aver attivato vlan su proxmox che non era su una vlan, ha continuato a funzionare per la native vlan.</p>
+<p>Una porta trunk che si aspetta pacchetti con il tag vlan, accetta anche pacchetti untagged ai quali assegna in automatico la native vlan che di default è 1.</p>
+<p>La native vlan non viene mai usata per far transitare dati utili o di management per prevenire un attacco chiamato vlan hopping. Nel nostro lab per non complicare l'ingresso del traffico wan del router casalingo, accettiamo che la rete di casa funzioni sul native vlan.</p>
+<h1 id="linux-bridge">Linux bridge</h1>
+<p><code>vmbr0</code> significa virtual machine bridge 0 -&gt; un bridge linux è uno switch lvl 2 creato via software.
+In proxmox se vado sul modulo principale (hermes) -&gt; system -&gt; network -&gt; vmbr0 -&gt; vlan aware
+carico nel kernel linux il modulo 8021q che trasforma questo switch software in managed -&gt; ora posso creare la vm</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../nginx-proxy/setup/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../nginx-proxy/setup/" class="btn btn-xs btn-link">
+        Setup iniziale
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../network_map/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../network_map/" class="btn btn-xs btn-link">
+        192.168.1.0/24 (WAN / Rete Base Untagged)
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/network/vlan_notions.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

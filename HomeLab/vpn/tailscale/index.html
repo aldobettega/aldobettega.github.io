@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Accesso Remoto: Zero Trust VPN con Tailscale su OPNsense - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Accesso Remoto: Zero Trust VPN con Tailscale su OPNsense", url: "#_top", children: [
+              {title: "1. Installazione su OPNsense", url: "#1-installazione-su-opnsense" },
+              {title: "2. Aggiunta Reti (Subnet Router)", url: "#2-aggiunta-reti-subnet-router" },
+              {title: "3. Configurazione DNS (Magic DNS e Pi-hole)", url: "#3-configurazione-dns-magic-dns-e-pi-hole" },
+              {title: "4. Utilizzo sui Client", url: "#4-utilizzo-sui-client" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../../starting_homelabbing/starting/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../starting_homelabbing/starting/" class="btn btn-xs btn-link">
+        Finding hardware
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="accesso-remoto-zero-trust-vpn-con-tailscale-su-opnsense">Accesso Remoto: Zero Trust VPN con Tailscale su OPNsense</h1>
+<p>I vecchi servizi di Dynamic DNS (come No-IP) richiedono un IP <strong>pubblico</strong>. Oggi molti provider (soprattutto su linee FWA o fibra) forniscono indirizzi del tipo <code>100.X.X.X</code> (es. <code>100.64.x.x</code>). Questo indica che siete dietro a un CGNAT (Carrier-Grade NAT). In questo scenario, il port forwarding tradizionale sul router non funziona. </p>
+<p>La soluzione moderna e più sicura (Zero Trust) è utilizzare <strong>Tailscale</strong>, che buca il NAT automaticamente senza aprire alcuna porta sul router.</p>
+<h2 id="1-installazione-su-opnsense">1. Installazione su OPNsense</h2>
+<ol>
+<li>Installare il plugin <code>os-tailscale</code> dalla sezione Firmware di OPNsense.</li>
+<li>Navigare in <strong>VPN &gt; Tailscale &gt; Settings</strong>, spuntare <strong>Enable</strong> e salvare.</li>
+<li>Andare nella tab <strong>Status</strong> e cliccare sul <strong>Login URL</strong> generato per autorizzare il firewall tramite il vostro account Tailscale.</li>
+</ol>
+<h2 id="2-aggiunta-reti-subnet-router">2. Aggiunta Reti (Subnet Router)</h2>
+<p>Abbiamo aggiunto OPNsense alla rete Tailscale, ma ora dobbiamo dirgli di agire da "ponte" (Subnet Router) per permetterci di raggiungere le VLAN interne dell'HomeLab dall'esterno (Split Tunneling).</p>
+<ol>
+<li>Su OPNsense, andare in <strong>VPN &gt; Tailscale &gt; Settings &gt; Advanced</strong>.</li>
+<li>Nel campo <strong>Advertised Routes</strong>, aggiungere le reti del nostro Lab separandole da virgola:
+   <code>192.168.1.0/24,10.0.10.0/24,10.0.20.0/24</code>
+   <em>(Nota: La 10.0.20.0/24 è fondamentale perché è la VLAN che ospita i nostri server e Nginx Proxy Manager).</em></li>
+<li>Dal sito web di Tailscale (Admin Console), andare nella lista <em>Machines</em>, cliccare sui tre puntini di fianco al dispositivo OPNsense, scegliere <strong>Edit route settings</strong> e approvare (spuntare) le reti appena annunciate.</li>
+</ol>
+<h2 id="3-configurazione-dns-magic-dns-e-pi-hole">3. Configurazione DNS (Magic DNS e Pi-hole)</h2>
+<p>Per poter digitare dal telefono <code>immich.lab.lan</code> ed essere reindirizzati al nostro server anche quando siamo fuori casa in 4G, dobbiamo dire a Tailscale di usare il nostro Pi-hole interno.</p>
+<p>Dalla Admin Console web di Tailscale, andare in <strong>DNS</strong>:
+1. Alla voce <strong>Nameservers</strong>, cliccare <em>Add nameserver &gt; Custom...</em> e inserire l'IP interno di Pi-hole sulla rete di Management: <code>10.0.10.4</code>.
+2. Spuntare l'opzione <strong>Override local DNS</strong> per forzare i client a usare Pi-hole, bloccando la pubblicità anche in mobilità e permettendo la risoluzione del dominio <code>lab.lan</code>.</p>
+<h2 id="4-utilizzo-sui-client">4. Utilizzo sui Client</h2>
+<h3 id="smartphone">Smartphone</h3>
+<ol>
+<li>Installare l'app di Tailscale (iOS/Android).</li>
+<li>Effettuare il login con lo stesso account.</li>
+<li>Avviare la VPN. L'app accetterà automaticamente le rotte di OPNsense, facendo passare nel tunnel <em>solo</em> il traffico destinato al Lab (garantendo massima velocità per la normale navigazione web). 
+<em>Nota: Selezionare "Use exit node" (OPNsense) solo se si è connessi a un Wi-Fi pubblico insicuro e si desidera far transitare l'intero traffico Internet (tunnel completo) in modo criptato verso casa.</em></li>
+</ol>
+<h3 id="pc-linux-macos">PC (Linux / macOS)</h3>
+<p>Per agganciare le rotte del Lab e le regole DNS di Pi-hole dal terminale:</p>
+<ul>
+<li>
+<p><strong>Accendere e sbloccare rotte e DNS:</strong>
+  <code>sudo tailscale up --accept-routes --accept-dns</code></p>
+</li>
+<li>
+<p><strong>Spegnere temporaneamente:</strong>
+  <code>sudo tailscale down</code></p>
+</li>
+<li>
+<p><strong>Disabilitare definitivamente (evita l'avvio al boot):</strong>
+  <code>sudo systemctl stop tailscaled</code>
+  <code>sudo systemctl disable tailscaled</code></p>
+</li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../../starting_homelabbing/starting/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../starting_homelabbing/starting/" class="btn btn-xs btn-link">
+        Finding hardware
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/vpn/tailscale.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

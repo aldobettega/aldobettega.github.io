@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Configurazione Switch - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Configurazione Switch", url: "#_top", children: [
+              {title: "Summary", url: "#summary" },
+              {title: "Descrizione", url: "#descrizione" },
+              {title: "Configurazione delle porte", url: "#configurazione-delle-porte" },
+              {title: "Fase in uscita: tabella 802.1Q", url: "#fase-in-uscita-tabella-8021q" },
+              {title: "Fase in ingresso: PVID", url: "#fase-in-ingresso-pvid" },
+          ]},
+          {title: "Aggiornamento infrastruttura", url: "#aggiornamento-infrastruttura", children: [
+              {title: "Inserimento dei servizi nella VLAN 20", url: "#inserimento-dei-servizi-nella-vlan-20" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../setup_iniziale/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../setup_iniziale/" class="btn btn-xs btn-link">
+        Architettura router on a stick
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../Proxmox_troubleshooting/spostamento_VM_e_LXC/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../Proxmox_troubleshooting/spostamento_VM_e_LXC/" class="btn btn-xs btn-link">
+        Come cambiare ID alle macchine
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="configurazione-switch">Configurazione Switch</h1>
+<h2 id="summary">Summary</h2>
+<p>1: proxmox
+2: Nas d-link vecchio
+3: Access Point MikroTik
+4: Nas nuovo
+5: -
+6: -
+7: -
+8: Accesso alla rete</p>
+<h2 id="descrizione">Descrizione</h2>
+<ul>
+<li>Porta 1: deve far passare tutto il traffico etichettato (Tagged) delle nuove VLAN, facendolo arrivare a OPNsense</li>
+<li>Porte 2 e 4: Untagged, connesse a devices di storage (NAS)</li>
+<li>Porta 3: ibrido </li>
+<li>mantiene la VLAN 10 Untagged per la gestione</li>
+<li>VLAN 30 e 40 Tagged per estensioni future (SSID multipli)</li>
+</ul>
+<h2 id="configurazione-delle-porte">Configurazione delle porte</h2>
+<p><img alt="alt text" src="../image.png" /></p>
+<h2 id="fase-in-uscita-tabella-8021q">Fase in uscita: tabella 802.1Q</h2>
+<p>Questa tabella indica come lo switch debba comportarsi quando un pacchetto ha un'etichetta VLAN e deve farlo uscire da una porta fisica verso un dispositivo.</p>
+<h3 id="nozioni-varie">Nozioni varie</h3>
+<ol>
+<li>Impostare una porta come Not Member di una VLAN significa che:<ul>
+<li>In uscita: mi assicuro che lo switch non invii mai un pacchetto con VLAN X la cui porta è Not Member di questa VLAN. Questo significa isolare dal traffico esterno un dispositivo.</li>
+<li>In entrata: se qualcuno si collega alla porta dei NAS usando un PC configurato per inviare pacchetti con la VLAN 10 (per comunicare sulla sezione critica di management), ma lo switch lo rigetta perchè da quella porta è Not Member della VLAN 10.</li>
+</ul>
+</li>
+<li>Una porta deve essere Untagged su una sola VLAN per volta per due motivi:<ul>
+<li>ne devo tenere solo una untagged così so che i pacchetti non taggati provengono da quella VLAN sicuramente. In caso contrario non saprei da quale VLAN vengono.</li>
+<li>siccome una porta ha un solo PVID allora non potrei gestire due VLAN untagged perchè dovrei usarne solo una delle due, dunque tutti i pacchetti in uscita andrebbero solamente in una VLAN.</li>
+</ul>
+</li>
+<li>Impostare una porta come Untagged di una VLAN significa che:<ul>
+<li>se il dispositivo è un Endpoint (PC o NAS), questo non capisce di rete, gli interessa ricevere il pacchetto non taggato.</li>
+<li>se il dispositivo è un Access Point: solitamente è Untagged dalla VLAN di management (come è in questo caso sulla VLAN 10) perchè sta ricevendo un pacchetto dal punto di gestione ed è l'Access Point stesso il ricevitore finale, non lo deve inoltrare. Inoltre se su questa VLAN fosse tagged il MikroTik andrebbe configurato per saper "spacchettare" pacchetti taggati</li>
+</ul>
+</li>
+</ol>
+<h3 id="porta-1">Porta 1</h3>
+<ul>
+<li>Tagged su 10,20,30,40: Proxmox e OPNsense sono dispositivi di rete intelligenti -&gt; sul singolo cavo passano 4 reti diverse per macchine virtuali diverse</li>
+<li>Untagged su 1: Proxmox ha IP sulla rete WAN casalinga (192.168.1.10), quindi se invio pacchetti senza etichetta dalla rete casalinga, lui risponde senza pacchetti. Questo garantisce di non rimanere chiuso fuori dall'homelab in caso di problemi con OPNsense.</li>
+</ul>
+<p>Nota: se la VLAN 1 fosse taggata, lo switch prende i pacchetti dalla rete WAN e ci incolla il VID=1.
+Questo pacchetto verrà rifiutato da proxmox per le configurazioni presenti in <code>/etc/network/interfaces</code> (indicano come IP=192.168.1.10) poichè non ha nessuna interfaccia virtuale configurata per rispondervi.
+Ora si è stati "tagliati fuori" e non si ha più accesso all'interfaccia web sulla porta 8006.</p>
+<h3 id="porta-2-e-4">Porta 2 e 4</h3>
+<ul>
+<li>Untagged su 20: i nas sono dispositivi stupidi a livello di rete, non producono tag VLAN in entrata. In questo modo lo switch toglie il tag che il dispositivo non riuscirebbe a tradurre.</li>
+<li>Not member sulle altre: isoliamo i due nas sulla VLAN 20, in questo modo se un dispositivo di un altra VLAN prova a comunicare con questi NAS il pacchetto viene bloccato. L'unico modo per accedervi è passare per il gateway di OPNsense e verificare le regole del firewall.</li>
+</ul>
+<h3 id="porta-3">Porta 3</h3>
+<ul>
+<li>Not member su 1 e 20: l'access point non c'entra nè con i server che con la rete WAN. In particolare è Not Member sulla VLAN 20 perchè un utente connesso al wifi dell'access point non deve poter vedere i NAS del server bypassando eventuali regole del firewall. Un motivo secondario è di performance: i messaggi broadcast viaggiano all'interno di una VLAN, se includo questa VLAN nella porta 3 i dispositivi collegati al wifi dovrebbero ascoltare i messaggi broadcast dei NAS senza alcun motivo, intasando la banda e consumando la batteria di questi.</li>
+<li>Untagged su 10: il destinatario ultimo è lui (arriva dalla rete Manageriale) e non sa spacchettare i tag, dovremo configurare il mikrotik.</li>
+<li>Tagged su 30 e 40: lo mettiamo tagged per possibili estensioni future, creando più reti wifi: quando l'access point riceve i pacchetti tagged dallo switch, usa il tag per sapere su quale rete wifi trasmetterlo.</li>
+</ul>
+<h3 id="porta-8">Porta 8</h3>
+<ul>
+<li>Untagged su 1: il router FritzBox non sa spacchettare i tag, deve ricevere pacchetti untagged e invia pacchetti non taggati.</li>
+<li>Not member su 10,20,30,40: il router della WAN non gestisce la sottorete e non deve conoscere di conseguenza le VLAN. Inoltre i pacchetti interni non devono mai finire su internet per errore, ma devono passare per forza per il firewall di OPNsense.</li>
+</ul>
+<h2 id="fase-in-ingresso-pvid">Fase in ingresso: PVID</h2>
+<p>Dobbiamo configurare che cosa deve succedere quando una porta riceve un pacchetto in ingresso da un dispositivo. Serve quando un pacchetto esc</p>
+<table>
+<thead>
+<tr>
+<th>PORT</th>
+<th>PVID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Port 1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Port 2</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Port 3</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Port 4</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Port 5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Port 6</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Port 7</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Port 8</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h1 id="aggiornamento-infrastruttura">Aggiornamento infrastruttura</h1>
+<p>Ora che abbiamo configurato correttamente le VLAN occorre aggiornare Proxmox affinchè tutto funzioni.</p>
+<ol>
+<li>Preparazione infrastruttura: è necessario assicurarsi che Hypervisor e Firewall comunichino correttamente<ul>
+<li>Disabilitare Hardware Offloading su OPNsense -&gt; evita che i driver virtuali VirtIO rimuovano le etichette 802.1Q dai pacchetti in transito</li>
+<li>Configurazione Trunk Proxmox: modificare il file <code>/etc/pve/qemu-server/101.conf</code> aggiungendo i tag consentiti alla scheda di rete: <code>net0: ...,bridge=vmbr0,trunks=10;20;30;40</code>. In questo modo il bridge VLAN-aware di Proxmox è istruito a far passare i pacchetti taggati verso OPNsense.</li>
+<li>Eseguire shutdown + restart della VM di OPNsense</li>
+</ul>
+</li>
+<li>Migrazione servizi:<ul>
+<li>Modificare l'interfaccia di rete del servizio posizionandolo sulla VLAN desiderata e aggiornare il Gateway sulla stessa VLAN.</li>
+<li>Eseguire shutdown + restart del servizio</li>
+</ul>
+</li>
+<li>Verifica:<ul>
+<li>ping a 10.0.20.1 -&gt; verifica L2 verso gateway di OPNsense</li>
+<li>ping a 8.8.8.8 -&gt; verifica che esca su internet (funziona firewall, routing NAT, L3)</li>
+</ul>
+</li>
+</ol>
+<h2 id="inserimento-dei-servizi-nella-vlan-20">Inserimento dei servizi nella VLAN 20</h2>
+<ol>
+<li>Spegnere la VM</li>
+<li>Modificare il VLAN tag della VM da Hardware &gt; Network &gt; in VLAN tag selezionare 20</li>
+<li>Accendere la VM e accedere la file di configurazione di rete con <code>/etc/newtoek/interfaces</code> e modificare la primary network interface da dhcp in:</li>
+</ol>
+<pre><code class="language-bash">    iface ens18 inet static
+        address 10.0.20.x/24
+        gateway 10.0.20.1
+        dns-nameservices 8.8.8.8 1.1.1.1
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../setup_iniziale/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../setup_iniziale/" class="btn btn-xs btn-link">
+        Architettura router on a stick
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../Proxmox_troubleshooting/spostamento_VM_e_LXC/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../Proxmox_troubleshooting/spostamento_VM_e_LXC/" class="btn btn-xs btn-link">
+        Come cambiare ID alle macchine
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/Switch/ports_vlans.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

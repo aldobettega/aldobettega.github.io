@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Backup NAS - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Backup NAS", url: "#_top", children: [
+              {title: "Effettuare un backup manuale", url: "#effettuare-un-backup-manuale" },
+              {title: "Automatizzare backup", url: "#automatizzare-backup" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../configurazione_iniziale/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../configurazione_iniziale/" class="btn btn-xs btn-link">
+        Formattazione NAS D-Link
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../jellyfin/setup/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../jellyfin/setup/" class="btn btn-xs btn-link">
+        Abilitare iommu su proxmox
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="backup-nas">Backup NAS</h1>
+<h2 id="effettuare-un-backup-manuale">Effettuare un backup manuale</h2>
+<p>Dalla gui di proxmox selezionare vm, andare in backup&gt;backup now e selezionare NAS_backup.</p>
+<h2 id="automatizzare-backup">Automatizzare backup</h2>
+<ol>
+<li>Aggiungere job automatico</li>
+<li>andare in: Datacenter&gt;Backup&gt;Add</li>
+<li>Storage: NAS_Backup</li>
+<li>Schedule: scrivere 02:00 per farlo andare tutti i giorni alle 2 di notte</li>
+<li>Selection mode: All per backuppare tutte vm e container</li>
+<li>Compression: ZSTD, abbiamo una cpu abbastanza potente per farlo</li>
+<li>
+<p>Mode: Snapshot, backup a caldo che non disabilita i servizi mentre salva</p>
+</li>
+<li>
+<p>Aggiungere regola di retention globale</p>
+</li>
+<li>andare in: Datacenter&gt;storage&gt;edit NAS_Backup&gt;Backup retention</li>
+<li>è buona pratica selezionare:<ul>
+<li>Keep last: 3</li>
+<li>Keep daily: 2</li>
+<li>Keep weekly: 1
+ in questo modo non riempiamo il disco di backup ma teniamo solo i più recenti.</li>
+</ul>
+</li>
+</ol>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../configurazione_iniziale/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../configurazione_iniziale/" class="btn btn-xs btn-link">
+        Formattazione NAS D-Link
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../jellyfin/setup/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../jellyfin/setup/" class="btn btn-xs btn-link">
+        Abilitare iommu su proxmox
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/nas/backup_job.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

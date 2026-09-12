@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Finding hardware - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Finding hardware", url: "#_top", children: [
+          ]},
+          {title: "Testing hardware", url: "#testing-hardware", children: [
+          ]},
+          {title: "Troubleshooting", url: "#troubleshooting", children: [
+              {title: "BIOS problems", url: "#bios-problems" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../vpn/tailscale/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../vpn/tailscale/" class="btn btn-xs btn-link">
+        Accesso Remoto: Zero Trust VPN con Tailscale su OPNsense
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../roadmap/progetti/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../roadmap/progetti/" class="btn btn-xs btn-link">
+        Progetti
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="finding-hardware">Finding hardware</h1>
+<p>To start a homelab on a budget, you have to search for the right hardware on the right sites for the right prices. I didn't have much experience in the hardware market, and in 2026 the prices are high, so you have to be thoughtful about what you purchase.</p>
+<p>Here are a few tips I can share after my hardware research:</p>
+<ul>
+<li>An initial setup consists of about one mini PC, one switch, and some patch cables to connect the mini PC and additional devices to the switch.</li>
+<li>The mini PC is the brain of the server. You have to search for at least 16GB of DDR4 RAM and a CPU with at least 6 cores and 6 threads since you have to virtualize several services. I chose an i5-8500T (the 'T' indicates that the processor has a reduced Thermal Design Power (TDP) of 35 watts, an essential spec for a machine that has to stay up 24/7).</li>
+<li>Buy used; give a shot to private sellers on eBay. I found an Acer Veriton N4660G for 160€, a very good price for this PC.</li>
+<li>Search by CPU (for ex. i5-8500T) instead of by the PC model (Acer Tiny), so you can skim a lot faster through the substantial specs of your PC.</li>
+<li>For the switch, I chose a TL-SG608E 8-port (30€ new on Amazon); the E means that it is managed. I found out later that some devices like access points need PoE (Power over Ethernet), so I had to buy a PoE injector because the model of this switch doesn't have this feature. Consider buying one with both managed and PoE features, or plan to buy a PoE injector (8-20€).</li>
+</ul>
+<p>So I started with:</p>
+<ul>
+<li>Acer Veriton N4660G (160€ used):<ul>
+<li>16GB RAM</li>
+<li>512GB SSD</li>
+<li>Intel Core i5-8500T</li>
+</ul>
+</li>
+<li>TP-Link Managed Switch TL-SG608E (30€ new)</li>
+<li>5 patch cables (0.25m) CAT6 (10€ new)</li>
+</ul>
+<h1 id="testing-hardware">Testing hardware</h1>
+<p>It is recommended to test your used hardware to know what you have actually bought. The Acer had Windows 10 installed, so I used this OS to run the checkups.</p>
+<ul>
+<li>RAM: mdsched.exe, a Windows program to detect the status of the RAM.</li>
+<li>SSD: CrystalDiskInfo, a program you have to download and install from a browser.</li>
+<li>CPU: Prime95 with CPUID HWMonitor. You run Prime95 to stress all the cores and monitor the test with HWMonitor; if the temperatures go over 80°C, consider changing the thermal paste.</li>
+</ul>
+<p>It is also recommended to open the case and clean the dust.</p>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<h2 id="bios-problems">BIOS problems</h2>
+<p>After I opened the case, the PC could power on but couldn't boot. I'm not a HW expert, but I did some checks, and after those, the PC magically booted:</p>
+<ul>
+<li>Switch the RAM or try booting with one RAM stick at a time.</li>
+<li>Change the BIOS battery (maybe it was dead).</li>
+<li>Reset the BIOS with the power button.</li>
+<li>Check that if you changed the thermal paste, it didn't spread too much; in that case, clean it.</li>
+<li>Pray.</li>
+</ul>
+<p>After those checks and prayers, the computer booted with a warning:
+ <code>THE CHASSIS WAS OPENED</code>
+So maybe this was one of the problems. This is a security message that blocks the boot of the BIOS. You have to disable it from the BIOS settings, so every time the system boots you don't have trouble.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../vpn/tailscale/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../vpn/tailscale/" class="btn btn-xs btn-link">
+        Accesso Remoto: Zero Trust VPN con Tailscale su OPNsense
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../roadmap/progetti/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../roadmap/progetti/" class="btn btn-xs btn-link">
+        Progetti
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/starting_homelabbing/starting.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

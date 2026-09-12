@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Documentazione As-Built &amp; To-Be: Architettura HomeLab - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Documentazione As-Built \u0026amp; To-Be: Architettura HomeLab", url: "#_top", children: [
+              {title: "1. Inventario Hardware e Mappatura Fisica (Layer 1)", url: "#1-inventario-hardware-e-mappatura-fisica-layer-1" },
+              {title: "2. Architettura di Rete e IP Plan (Layer 2 \u0026amp; 3)", url: "#2-architettura-di-rete-e-ip-plan-layer-2-3" },
+              {title: "3. Gestione Servizi e Nodi Proxmox", url: "#3-gestione-servizi-e-nodi-proxmox" },
+              {title: "4. Architettura DNS Ibrida e Service Discovery", url: "#4-architettura-dns-ibrida-e-service-discovery" },
+              {title: "5. Accesso Remoto (Zero Trust VPN via Tailscale)", url: "#5-accesso-remoto-zero-trust-vpn-via-tailscale" },
+              {title: "6. Note Operative Hardware", url: "#6-note-operative-hardware" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../czkawka/setup/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../czkawka/setup/" class="btn btn-xs btn-link">
+        Installazione VM
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../Switch/setup_iniziale/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../Switch/setup_iniziale/" class="btn btn-xs btn-link">
+        Architettura router on a stick
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="documentazione-as-built-to-be-architettura-homelab">Documentazione As-Built &amp; To-Be: Architettura HomeLab</h1>
+<p>Questo documento descrive lo stato dell'infrastruttura di rete, l'inventario hardware e l'IP Plan strutturato secondo principi di segmentazione (Zero Trust). Il setup è orientato alla sicurezza e scalabilità per futuri utenti e collaboratori.</p>
+<h2 id="1-inventario-hardware-e-mappatura-fisica-layer-1">1. Inventario Hardware e Mappatura Fisica (Layer 1)</h2>
+<p>L'infrastruttura si basa su dispositivi efficienti e compatti, interconnessi tramite uno switch managed centrale.</p>
+<ul>
+<li><strong>Server Host (Hypervisor):</strong> Mini PC Acer Veriton N4660G (i5-8500T, 16GB RAM, 512GB NVMe). Ha una sola scheda di rete (<code>nic0</code>).</li>
+<li><strong>Switch Core:</strong> TP-Link TL-SG608E (Gestito, L2, 8 porte Gigabit).</li>
+<li><strong>Access Point:</strong> MikroTik wsAP ac lite (alimentato via PoE tramite Iniettore Tenda POE15F).</li>
+<li><strong>Storage di Rete:</strong> </li>
+<li>Synology NAS (Nuovo/Principale - <code>DOMUS-NAS</code>)</li>
+<li>D-Link NAS (Vecchio - per backup)</li>
+<li><strong>Router ISP:</strong> Fritzbox (Fornisce connettività WAN alla rete).</li>
+</ul>
+<h3 id="11-mappatura-e-configurazione-porte-switch-tp-link-8021q-pvid">1.1 Mappatura e Configurazione Porte Switch TP-Link (802.1Q &amp; PVID)</h3>
+<p>La configurazione dello switch L2 gestisce il traffico in uscita (matrice Tagged/Untagged) e in entrata (PVID) per garantire il corretto instradamento e l'isolamento hardware (VLAN Ingress Filtering).</p>
+<ul>
+<li><strong>Porta 1 (Proxmox Host &amp; OPNsense):</strong></li>
+<li><strong>Uscita:</strong> Tagged su VLAN 10, 20, 30, 40 (Trunk verso le macchine virtuali). Untagged su VLAN 1 (Native VLAN, previene il lockout su Proxmox).</li>
+<li><strong>Ingresso:</strong> PVID 1.</li>
+<li><strong>Porta 2 (Vecchio NAS D-Link):</strong></li>
+<li><strong>Uscita:</strong> Untagged su VLAN 20 (Storage). Not Member sulle altre (Filtro hardware contro accessi esterni).</li>
+<li><strong>Ingresso:</strong> PVID 20.</li>
+<li><strong>Porta 3 (MikroTik AP):</strong></li>
+<li><strong>Uscita:</strong> Untagged su VLAN 10 (Accesso diretto di Management per evitare lockout). Tagged su VLAN 30, 40 (Supporto SSID multipli per gli ospiti). Not Member su 1 e 20 (Isolamento rete WAN e abbattimento rumore broadcast dei server).</li>
+<li><strong>Ingresso:</strong> PVID 10.</li>
+<li><strong>Porta 4 (Nuovo NAS Synology):</strong></li>
+<li><strong>Uscita:</strong> Untagged su VLAN 20 (Storage). Not Member sulle altre.</li>
+<li><strong>Ingresso:</strong> PVID 20.</li>
+<li><strong>Porte 5, 6, 7 (Non connesse):</strong></li>
+<li><strong>Uscita:</strong> Untagged su VLAN 1.</li>
+<li><strong>Ingresso:</strong> PVID 1 (Default).</li>
+<li><strong>Porta 8 (Uplink WAN / Fritzbox):</strong></li>
+<li><strong>Uscita:</strong> Untagged su VLAN 1. Not Member su 10, 20, 30, 40 (Previene il leak di traffico interno sulla WAN).</li>
+<li><strong>Ingresso:</strong> PVID 1.</li>
+</ul>
+<hr />
+<h2 id="2-architettura-di-rete-e-ip-plan-layer-2-3">2. Architettura di Rete e IP Plan (Layer 2 &amp; 3)</h2>
+<p>La rete adotta un approccio "Router on a Stick" gestito da un firewall virtualizzato (OPNsense). Proxmox ha la direttiva <code>bridge-vlan-aware yes</code> attiva sul bridge <code>vmbr0</code>. 
+L'IP di Proxmox è volutamente mantenuto sulla rete dell'ISP per garantire l'accesso d'emergenza in caso di crash della VM del firewall (evitando il "lock-out").</p>
+<ul>
+<li><strong>VLAN 1 (Transit / Fallback) - <code>192.168.1.0/24</code></strong></li>
+<li><code>192.168.1.1</code>: Fritzbox (ISP)</li>
+<li><code>192.168.1.10</code>: Proxmox Host (Interfaccia di emergenza fuori dal routing interno)</li>
+<li><strong>VLAN 10 (Management) - <code>10.0.10.0/24</code></strong></li>
+<li>Rete dedicata <em>esclusivamente</em> all'hardware di rete.</li>
+<li><code>10.0.10.1</code>: Gateway OPNsense</li>
+<li><code>10.0.10.2</code>: Switch TP-Link</li>
+<li><code>10.0.10.3</code>: MikroTik AP</li>
+<li><code>10.0.10.4</code>: Pi-hole</li>
+<li><strong>VLAN 20 (Servers &amp; NAS) - <code>10.0.20.0/24</code></strong></li>
+<li>Core applicativo e storage. Nessun accesso diretto dall'esterno.</li>
+<li><code>10.0.20.1</code>: Gateway OPNsense</li>
+<li><code>10.0.20.3</code>: Nginx Proxy Manager (IP Statico)</li>
+<li><code>10.0.20.10</code>: Immich</li>
+<li><code>10.0.20.11</code>: Jellyfin</li>
+<li><code>10.0.20.50</code>: Nas D-link</li>
+<li><strong>VLAN 30 (Trusted / Lab Admins) - <code>10.0.30.0/24</code></strong></li>
+<li>Rete privilegiata per amministratori. Può accedere a tutte le altre VLAN tramite regole firewall.</li>
+<li><code>10.0.30.1</code>: Gateway OPNsense</li>
+<li><code>10.0.30.50 - 10.0.30.200</code>: Pool DHCP per PC e dispositivi personali.</li>
+<li><strong>VLAN 40 (Guests / Users) - <code>10.0.40.0/24</code></strong></li>
+<li>Rete per utenti Wi-Fi isolata (Zero Trust). Accesso solo a Internet e porte specifiche dei servizi web.</li>
+<li><code>10.0.40.1</code>: Gateway OPNsense</li>
+<li><code>10.0.40.50 - 10.0.40.200</code>: Pool DHCP</li>
+</ul>
+<h3 id="21-stato-configurazione-logica-opnsense">2.1 Stato Configurazione Logica (OPNsense)</h3>
+<ul>
+<li><strong>Servizio DHCP (Kea):</strong> Attivo e funzionante. Pool configurati per VLAN 10 (Gestione), VLAN 30 (Trusted) e VLAN 40 (Guests).</li>
+<li><strong>Firewall Rules (Zero Trust base):</strong> Le interfacce TRUSTED, GUESTS e SERVERS sono attualmente configurate con regole provvisorie "Allow All" (Action: Pass, IPv4, Protocol: Any, Source: [Nome] net, Dest: any) per validare la connettività Layer 3 e permettere il routing verso Internet durante la migrazione. Da restringere in fase di hardening.</li>
+</ul>
+<hr />
+<h2 id="3-gestione-servizi-e-nodi-proxmox">3. Gestione Servizi e Nodi Proxmox</h2>
+<p>I servizi sono isolati tramite container LXC e VM su Proxmox:</p>
+<ul>
+<li><strong>100 (opnsense-router):</strong> VM isolata, core network e firewall.</li>
+<li><strong>101 (pi-hole):</strong> Container LXC per filtraggio DNS.</li>
+<li><strong>102 (nginx-proxy):</strong> Container LXC (VLAN 20, IP <code>10.0.20.3</code>) con Docker nidificato. Espone i servizi internamente ed esternamente.</li>
+<li><strong>Nodi Applicativi:</strong> 110 <code>immich-server</code>, 111 <code>jellyfin-server</code> e 112 <code>czkawka-service</code>.</li>
+</ul>
+<hr />
+<h2 id="4-architettura-dns-ibrida-e-service-discovery">4. Architettura DNS Ibrida e Service Discovery</h2>
+<p>La rete usa un dominio locale (<code>lab.lan</code>) per accedere ai servizi senza usare gli IP. La catena di risoluzione:
+1. <strong>DHCP:</strong> OPNsense assegna Pi-hole come server DNS univoco.
+2. <strong>Filtraggio:</strong> Pi-hole (Quad9 per le query pubbliche).
+3. <strong>Inoltro Condizionato:</strong> Pi-hole invia le richieste per <code>lab.lan</code> a OPNsense. copre sia la sottorete 10.0.10.0/24 che la 10.0.20.0/24
+4. <strong>Risoluzione Locale:</strong> OPNsense (Unbound DNS) mappa tutti i sottodomini (es. <code>immich.lab.lan</code>) verso l'IP di Nginx Proxy Manager (<code>10.0.20.3</code>).
+5. <strong>Proxying:</strong> Nginx smista il traffico alle porte e agli IP corretti dei container sulla VLAN 20.</p>
+<ol>
+<li>Accesso Remoto (Zero Trust VPN via Tailscale)</li>
+</ol>
+<h2 id="5-accesso-remoto-zero-trust-vpn-via-tailscale">5. Accesso Remoto (Zero Trust VPN via Tailscale)</h2>
+<p>L'accesso dall'esterno all'HomeLab e ai servizi interni è gestito interamente tramite Tailscale, garantendo un'architettura Zero Trust senza esporre porte su Internet.</p>
+<ul>
+<li><strong>Subnet Router:</strong> L'agent di Tailscale è configurato come plugin direttamente sul firewall OPNsense, che funge da nodo centrale (Subnet Router) per instradare il traffico verso le VLAN interne.</li>
+<li><strong>Rotte Annunciate:</strong> OPNsense annuncia attivamente le reti <code>10.0.10.0/24</code> (Management) e <code>10.0.20.0/24</code> (Servers/Apps). I client (es. PC, smartphone) devono connettersi utilizzando il flag <code>--accept-routes</code> per poter instradare correttamente il traffico verso il Lab.</li>
+<li><strong>Gestione DNS Globale:</strong> Nella console di amministrazione web di Tailscale, l'IP di Pi-hole (<code>10.0.10.4</code>) è impostato come <em>Global Nameserver</em> con l'opzione <em>Override local DNS</em> attiva. I client devono connettersi con il flag <code>--accept-dns</code> per poter risolvere correttamente i domini locali (es. <code>immich.lab.lan</code> proxyato da Nginx) e beneficiare del filtraggio pubblicitario anche da remoto.</li>
+</ul>
+<hr />
+<h2 id="6-note-operative-hardware">6. Note Operative Hardware</h2>
+<ul>
+<li><strong>Migrazione e Configurazione NAS Legacy (D-Link):</strong> A causa di limitazioni hardware e timeout del client DHCP interno al dispositivo quando interfacciato con porte switch in modalità VLAN Access, il NAS fallisce l'acquisizione dinamica dell'IP. Affinché comunichi sulla VLAN 20, deve essere configurato in modalità <strong>IP Statico</strong> direttamente dalla sua interfaccia web:</li>
+<li><strong>IP Address:</strong> <code>10.0.20.50</code></li>
+<li><strong>Subnet Mask:</strong> <code>255.255.255.0</code></li>
+<li><strong>Gateway:</strong> <code>10.0.20.1</code> (OPNsense)</li>
+<li><strong>DNS:</strong> <code>10.0.10.4</code> (Pi-hole)</li>
+</ul>
+<p><em>Nota:</em> Questa configurazione manuale è l'unico modo per garantirne il riconoscimento sullo switch TP-Link (Porta 2, Untagged, PVID 20) e permettere l'aggancio del mount CIFS da parte della macchina virtuale di Immich.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../czkawka/setup/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../czkawka/setup/" class="btn btn-xs btn-link">
+        Installazione VM
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../Switch/setup_iniziale/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../Switch/setup_iniziale/" class="btn btn-xs btn-link">
+        Architettura router on a stick
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/context/context.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

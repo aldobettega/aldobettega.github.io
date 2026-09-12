@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Nas synology - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "1. Specifiche Hardware", url: "#_top", children: [
+          ]},
+          {title: "Azioni", url: "#azioni", children: [
+              {title: "Creazione cartella condivisa", url: "#creazione-cartella-condivisa" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../spostamento_file/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../spostamento_file/" class="btn btn-xs btn-link">
+        creare maccchina muletto
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../configurazione_iniziale/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../configurazione_iniziale/" class="btn btn-xs btn-link">
+        Formattazione NAS D-Link
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h3 id="1-specifiche-hardware">1. Specifiche Hardware</h3>
+<p><strong>NAS Principale: Synology DS216play</strong></p>
+<ul>
+<li><strong>Processore e RAM:</strong> STM Monaco STiH412 (Dual-Core 1.5 GHz, 32-bit) con 1 GB di RAM DDR3.</li>
+<li><strong>Dischi Interni:</strong> 2x Western Digital Red da 2 TB (WD20EFRX, 5400 RPM).</li>
+<li><strong>Configurazione Volume:</strong> SHR/RAID 1 (Mirroring). Genera 1.8 TB di spazio totale (1 TB attualmente occupato) e garantisce continuità operativa in caso di guasto hardware di un disco.</li>
+<li><strong>Sistema Operativo:</strong> DSM 7.0.</li>
+</ul>
+<p><strong>Disco USB Esterno: WD Elements Desktop (WDBWLG)</strong></p>
+<ul>
+<li><strong>Specifiche:</strong> Collegamento USB 3.0, hard disk meccanico interno a 5400 RPM (velocità di trasferimento ~100-130 MB/s).</li>
+<li><strong>Capienza:</strong> Da verificare tramite il menu <em>Dispositivi Esterni</em> sul NAS.</li>
+</ul>
+<p><strong>NAS Secondario: D-Link DNS-323</strong></p>
+<ul>
+<li><strong>Specifiche:</strong> Modello legacy con 200 GB di archiviazione totale e vecchi protocolli di rete (SMBv1).</li>
+</ul>
+<h1 id="azioni">Azioni</h1>
+<h2 id="creazione-cartella-condivisa">Creazione cartella condivisa</h2>
+<p>Creare una cartella condivisa sul synology:</p>
+<ul>
+<li>mettere permessi di lettura scrittura a user con cui si fa accesso e senza crittografia</li>
+</ul>
+<p>Predisporre container LXC di proxmox</p>
+<ul>
+<li>dalla gui di proxmox dalle impostazioni del container andare in options&gt;features e attivare SMB/CIFS</li>
+<li>riavviare container</li>
+<li>accedere in ssh al container</li>
+<li>creare cartella con  mkdir -p /mnt/synology</li>
+<li>montare con
+    mount -t cifs //ip_nas/cartella_condivisa_nas /mnt/synology -o username=,vers=2.0,cache=none,echo_interval=60</li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../spostamento_file/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../spostamento_file/" class="btn btn-xs btn-link">
+        creare maccchina muletto
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../configurazione_iniziale/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../configurazione_iniziale/" class="btn btn-xs btn-link">
+        Formattazione NAS D-Link
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/nas/nas_synology.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Installare vm - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Installare vm", url: "#_top", children: [
+          ]},
+          {title: "Installazione pi-hole", url: "#installazione-pi-hole", children: [
+          ]},
+          {title: "Configurare", url: "#configurare", children: [
+              {title: "Conditional fowarding", url: "#conditional-fowarding" },
+              {title: "Aggiungere proxy", url: "#aggiungere-proxy" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../roadmap/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../roadmap/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../packet_tracer_lab/packet_tracer_lab/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../packet_tracer_lab/packet_tracer_lab/" class="btn btn-xs btn-link">
+        Overview
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="installare-vm">Installare vm</h1>
+<ul>
+<li>os: debian13</li>
+<li>core: 1</li>
+<li>ram: 512MB</li>
+<li>storage: 4GB </li>
+<li>static ip: 10.0.10.10/24</li>
+<li>gateway: 10.0.10.1</li>
+</ul>
+<h1 id="installazione-pi-hole">Installazione pi-hole</h1>
+<ol>
+<li>
+<p>Aggiornare sistema
+    apt update &amp;&amp; apt upgrade -y</p>
+</li>
+<li>
+<p>Installare pi-hole
+    curl -sSL https://install.pi-hole.net | bash</p>
+</li>
+</ol>
+<p>Procedere con l'installazione</p>
+<h1 id="configurare">Configurare</h1>
+<p><img alt="alt text" src="../image-1.png" /></p>
+<p>Selezionare Quad9(filtered, DNSSEC) perchè include un filtro anti-malware e anti-phishing.</p>
+<p>Aggiornare gravity: mantiene una lista dei siti segnalati come pericolosi, le ultime definizioni di tracker e banner pubblicitari.</p>
+<p>Aggiungere su OPNsense il nuovo DNS di pi-hole, in questo modo impongo ai dispositivi connessi alla rete di utilizzare Pi-hole come DNS primario.
+<img alt="alt text" src="../image-2.png" /></p>
+<h2 id="conditional-fowarding">Conditional fowarding</h2>
+<p><img alt="alt text" src="../image.png" /></p>
+<p>aggiungerte il conditional fowarding per smistare le richieste dei dispositivi connessi alla rete.
+Se un dispositivo fa una richiesta normale viene smistato verso Quad9 ed il suo filtro anti-malware.
+Se fa una richiesta di tipo x.lab.lan chiedendo una richiesta interna -&gt; dirotta su OPNsense che ha la mappa di rete.</p>
+<h2 id="aggiungere-proxy">Aggiungere proxy</h2>
+<p>Andare su nginx proxy manager e aggiungere un proxy host, scrivendo</p>
+<ul>
+<li>dominio (x.lab.lan)</li>
+<li>indirizzo</li>
+<li>checkare le tre caselle (cache, protezione da exploit...)</li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../roadmap/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../roadmap/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../packet_tracer_lab/packet_tracer_lab/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../packet_tracer_lab/packet_tracer_lab/" class="btn btn-xs btn-link">
+        Overview
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/pi-hole/setup.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

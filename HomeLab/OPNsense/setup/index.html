@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Configurazione: OPNsense (Router on a Stick) - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Configurazione: OPNsense (Router on a Stick)", url: "#_top", children: [
+              {title: "1. Preparazione dell\u0027Hypervisor (Proxmox)", url: "#1-preparazione-dellhypervisor-proxmox" },
+              {title: "2. Installazione e Risoluzione Errori (Console)", url: "#2-installazione-e-risoluzione-errori-console" },
+              {title: "3. Network Design e Topologia Logica (Console)", url: "#3-network-design-e-topologia-logica-console" },
+              {title: "4. Sicurezza e Accesso di Emergenza (Shell \u0026amp; WebGUI)", url: "#4-sicurezza-e-accesso-di-emergenza-shell-webgui" },
+              {title: "5. Ottimizzazione e Telemetria (WebGUI)", url: "#5-ottimizzazione-e-telemetria-webgui" },
+              {title: "6. Abilitare l\u0027Accesso SSH", url: "#6-abilitare-laccesso-ssh" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../Proxmox_troubleshooting/reset_password/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../Proxmox_troubleshooting/reset_password/" class="btn btn-xs btn-link">
+        Non ricordo la password di un LXC
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../notions/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../notions/" class="btn btn-xs btn-link">
+        Nozioni
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="configurazione-opnsense-router-on-a-stick">Configurazione: OPNsense (Router on a Stick)</h1>
+<h2 id="1-preparazione-dellhypervisor-proxmox">1. Preparazione dell'Hypervisor (Proxmox)</h2>
+<ul>
+<li><strong>VLAN Awareness:</strong> Abilitata l'opzione <em>VLAN aware</em> sul bridge virtuale <code>vmbr0</code> per trasformarlo in uno switch gestito capace di leggere i tag 802.1Q senza isolare l'host.</li>
+<li><strong>Creazione VM ottimizzata:</strong></li>
+<li>Disabilitato il firewall di Proxmox sulla singola interfaccia di rete virtuale (vNIC) per evitare il doppio filtraggio.</li>
+<li>Impostato il disco su <em>VirtIO Block</em> per massimizzare le performance dell'SSD.</li>
+<li>Impostata la CPU su <em>Host</em> per esporre le istruzioni crittografiche AES-NI della CPU Intel.</li>
+<li>Disabilitato il <em>Ballooning</em> della RAM per prevenire instabilità del kernel di FreeBSD.</li>
+</ul>
+<h2 id="2-installazione-e-risoluzione-errori-console">2. Installazione e Risoluzione Errori (Console)</h2>
+<ul>
+<li><strong>Provisioning:</strong> Aumentata temporaneamente la RAM della VM a 4 GB per superare il limite del Ramdisk durante la copia del file system (Live CD).</li>
+<li><strong>File System:</strong> Scelto <em>UFS</em> (rispetto a ZFS) per risparmiare preziosa memoria RAM in ottica HomeLab.</li>
+</ul>
+<h2 id="3-network-design-e-topologia-logica-console">3. Network Design e Topologia Logica (Console)</h2>
+<ul>
+<li><strong>Sdoppiamento Scheda (VLAN 10):</strong> Creata l'interfaccia virtuale <code>vtnet0_vlan10</code> basata sulla singola interfaccia fisica.</li>
+<li><strong>Assegnazione Ruoli Base:</strong></li>
+<li><strong>WAN:</strong> assegnata a <code>vtnet0</code> (traffico <em>Untagged</em> proveniente dal router ISP / rete base).</li>
+<li><strong>Management:</strong> assegnata a <code>vtnet0_vlan10</code> (traffico <em>Tagged</em> isolato per l'hardware di rete).</li>
+<li><strong>Configurazione IP e Servizi (VLAN 10):</strong></li>
+<li>Impostato IP statico del gateway a <code>10.0.10.1/24</code>.</li>
+<li>Attivato il server <strong>Kea DHCP</strong> per il range <code>10.0.10.100 - 200</code>.</li>
+<li><strong>Completamento Router-on-a-Stick:</strong> Successivamente (dalla WebGUI), la stessa procedura di sdoppiamento dell'interfaccia è stata ripetuta per creare le altre sottoreti (VLAN 20 Servers, VLAN 30 Trusted, VLAN 40 Guests), agganciandole sempre all'interfaccia genitore <code>vtnet0</code>.</li>
+</ul>
+<h2 id="4-sicurezza-e-accesso-di-emergenza-shell-webgui">4. Sicurezza e Accesso di Emergenza (Shell &amp; WebGUI)</h2>
+<ul>
+<li><strong>Bypass Temporaneo:</strong> Utilizzato il comando <code>pfctl -d</code> da shell per abbattere temporaneamente il packet filtering e accedere alla WebGUI dall'esterno (lato WAN).</li>
+<li><strong>Regola di Management (Backdoor sicura):</strong> Creata una regola esplicita in ingresso sulla WAN per consentire il traffico HTTPS verso "This Firewall" proveniente solo dalla rete locale (<code>WAN net</code>).</li>
+<li><strong>Risoluzione Conflitto NAT:</strong> Disattivato il blocco delle reti private (RFC 1918) e Bogon sull'interfaccia WAN per permettere al firewall di operare dietro il router casalingo (Double NAT).</li>
+</ul>
+<h2 id="5-ottimizzazione-e-telemetria-webgui">5. Ottimizzazione e Telemetria (WebGUI)</h2>
+<ul>
+<li><strong>Allineamento Firmware:</strong> Aggiornato il sistema base di OPNsense all'ultima versione disponibile per risolvere i conflitti di dipendenze del gestore pacchetti.</li>
+<li><strong>Integrazione Hypervisor:</strong> Installato, abilitato e avviato il plugin <code>os-qemu-guest-agent</code> per comunicare metriche reali (RAM e IP) a Proxmox tramite il canale seriale VirtIO.</li>
+</ul>
+<h2 id="6-abilitare-laccesso-ssh">6. Abilitare l'Accesso SSH</h2>
+<p>Per facilitare la gestione da terminale:
+1. Andare su <strong>System &gt; Settings &gt; Administration</strong>.
+2. Abilitare la voce <strong>Enable Secure Shell (SSH)</strong>.
+3. (Opzionale ma consigliato) Permettere l'accesso root e l'autenticazione tramite chiave pubblica.</p>
+<p>Accedere da terminale con:
+```bash
+ssh root@10.0.10.1</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../Proxmox_troubleshooting/reset_password/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../Proxmox_troubleshooting/reset_password/" class="btn btn-xs btn-link">
+        Non ricordo la password di un LXC
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../notions/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../notions/" class="btn btn-xs btn-link">
+        Nozioni
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/OPNsense/setup.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

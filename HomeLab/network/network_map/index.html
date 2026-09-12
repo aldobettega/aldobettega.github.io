@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>192.168.1.0/24 (WAN / Rete Base Untagged) - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "192.168.1.0/24 (WAN / Rete Base Untagged)", url: "#_top", children: [
+          ]},
+          {title: "Rete Homelab", url: "#rete-homelab", children: [
+              {title: "VLAN 10 - Management \u0026amp; Core Infrastructure (10.0.10.0/24)", url: "#vlan-10-management-core-infrastructure-10010024" },
+              {title: "VLAN 20 - Servers, Storage \u0026amp; Apps (10.0.20.0/24)", url: "#vlan-20-servers-storage-apps-10020024" },
+              {title: "VLAN 30 - Trusted / Home Network (10.0.30.0/24)", url: "#vlan-30-trusted-home-network-10030024" },
+              {title: "VLAN 40 - Guest \u0026amp; Untrusted (10.0.40.0/24)", url: "#vlan-40-guest-untrusted-10040024" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../vlan_notions/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../vlan_notions/" class="btn btn-xs btn-link">
+        Vlan notions
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../nas/spostamento_file/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../nas/spostamento_file/" class="btn btn-xs btn-link">
+        creare maccchina muletto
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="1921681024-wan-rete-base-untagged">192.168.1.0/24 (WAN / Rete Base Untagged)</h1>
+<ul>
+<li>192.168.1.1: FritzBox router (WAN gateway e DHCP base)</li>
+<li>192.168.1.10: Proxmox Server (Hermes - Interfaccia di emergenza/fisica su <code>vmbr0</code>)</li>
+<li>192.168.1.217: OPNsense router (Interfaccia virtuale WAN che riceve Internet dal Fritzbox)</li>
+</ul>
+<h1 id="rete-homelab">Rete Homelab</h1>
+<h2 id="vlan-10-management-core-infrastructure-10010024">VLAN 10 - Management &amp; Core Infrastructure (10.0.10.0/24)</h2>
+<ul>
+<li>10.0.10.1: OPNsense router (Gateway VLAN 10)</li>
+<li>10.0.10.2: Switch TP-Link (IP di gestione)</li>
+<li>10.0.10.3: AccessPoint MikroTik (IP di gestione)</li>
+<li>10.0.10.4: Pi-hole (DNS Server primario dell'infrastruttura - Container LXC 101)</li>
+</ul>
+<h2 id="vlan-20-servers-storage-apps-10020024">VLAN 20 - Servers, Storage &amp; Apps (10.0.20.0/24)</h2>
+<ul>
+<li>10.0.20.1: OPNsense router (Gateway VLAN 20)</li>
+<li>10.0.20.3: Nginx Proxy Manager (Reverse Proxy e porta d'ingresso per i servizi web)</li>
+<li>10.0.20.10: Immich Server (VM 110)</li>
+<li>10.0.20.11: Jellyfin Server (VM 111)</li>
+<li>10.0.20.12: Czkawka Service (VM 112)</li>
+<li>10.0.20.50: NAS D-Link (Storage Principale - Untagged dalla Porta 2 dello switch, IP Statico)</li>
+<li>10.0.20.51: NAS Synology (Nuovo/Temporaneo - Untagged dalla Porta 4 dello switch)</li>
+<li>10.0.20.100: Proxmox Server (Interfaccia virtuale <code>vmbr0.20</code> dedicata al traffico di mount/backup Layer 2 verso i NAS)</li>
+</ul>
+<h2 id="vlan-30-trusted-home-network-10030024">VLAN 30 - Trusted / Home Network (10.0.30.0/24)</h2>
+<ul>
+<li>10.0.30.1: OPNsense router (Gateway VLAN 30)</li>
+<li>10.0.30.x (DHCP): Dispositivi personali affidabili connessi alla rete Wi-Fi del MikroTik.</li>
+</ul>
+<h2 id="vlan-40-guest-untrusted-10040024">VLAN 40 - Guest &amp; Untrusted (10.0.40.0/24)</h2>
+<p>Rete isolata dal resto del lab in ottica Zero Trust. I client non possono raggiungere Proxmox, i NAS o le altre VLAN; il traffico verso le reti private (RFC1918) è bloccato dal firewall. Possono connettersi solo a Internet.</p>
+<ul>
+<li>10.0.40.1: OPNsense router (Gateway VLAN 40)</li>
+<li>10.0.40.x (DHCP): Utenti ospiti (amici/parenti) connessi a un SSID Wi-Fi "Guest" dedicato sul MikroTik.</li>
+<li>10.0.40.x (DHCP/Statico): Dispositivi Smart Home / IoT (TV, telecamere, lampadine) che richiedono solo l'accesso al cloud.</li>
+<li>10.0.40.x: Eventuali VM "Sandbox" date in concessione a utenti esterni per fare esperimenti, isolate dai dati sensibili.</li>
+</ul>
+<hr />
+<p><strong>Nota sull'Accesso Esterno (Zero Trust):</strong>
+Gli utenti esterni che utilizzano servizi come Immich da remoto non si interfacciano mai con la porta WAN esposta su Internet. L'accesso avviene tramite il tunnel VPN Tailscale configurato su OPNsense (Subnet Router). Il traffico entra criptato, viene instradato verso Nginx Proxy Manager (<code>10.0.20.3</code>), il quale preleva e serve i dati in modo sicuro interrogando i vari nodi sulla VLAN 20.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../vlan_notions/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../vlan_notions/" class="btn btn-xs btn-link">
+        Vlan notions
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../nas/spostamento_file/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../nas/spostamento_file/" class="btn btn-xs btn-link">
+        creare maccchina muletto
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/network/network_map.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>
