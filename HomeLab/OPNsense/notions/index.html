@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Nozioni - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Nozioni", url: "#_top", children: [
+              {title: "VM o Container?", url: "#vm-o-container" },
+              {title: "Paravirtualizzazione o emulazione", url: "#paravirtualizzazione-o-emulazione" },
+              {title: "distribuzione delle risorse", url: "#distribuzione-delle-risorse" },
+              {title: "UFS vs ZFS", url: "#ufs-vs-zfs" },
+              {title: "Disco", url: "#disco" },
+              {title: "noVNC", url: "#novnc" },
+              {title: "Creazione VLAN", url: "#creazione-vlan" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../setup/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../setup/" class="btn btn-xs btn-link">
+        Configurazione: OPNsense (Router on a Stick)
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../Segmentazione_rete/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../Segmentazione_rete/" class="btn btn-xs btn-link">
+        Segmentazione Rete e Firewall (Zero Trust)
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="nozioni">Nozioni</h1>
+<h2 id="vm-o-container">VM o Container?</h2>
+<p>Per OPNsense verrà usata una VM completa per due motivi</p>
+<ul>
+<li>isolamento dal kernel -&gt; un container condivide il kernel linux con l'host proxmox, ma OPNsense si basa su un OS diverso (FreeBSD), non può girare su linux</li>
+<li>sicurezza e rete -&gt; una vm garantisce che una compromissione del firewall (che esegue operazioni complesse e di basso livello) non si propaghi all'host proxmox</li>
+</ul>
+<h2 id="paravirtualizzazione-o-emulazione">Paravirtualizzazione o emulazione</h2>
+<p>Con una vm di solito l'hypervisor emula hw di rete -&gt; ma emulare è un'operazione costosa per la cpu (continua traduzione).
+La paravirtualizzazione (VirtIO) consente di usare un canale diretto per parlare direttamente con la scheda di rete dell'host, performance più alte.</p>
+<h2 id="distribuzione-delle-risorse">distribuzione delle risorse</h2>
+<p>No cpu pinning -&gt; non riservo core di silicio fisici ma assegno vCPU: il servizio esegue calcoli con massimo 2 core per volta.
+A gestire il tutto c'è CFS (Completly Fair Scheduler), gestisce risorse assegnate al sistema operativo proxmox (tutte: 6 core fisici).
+Le vm passano gran parte del tempo in idle.</p>
+<p>Il limite non è la somma delle vCPU ma il carico effettivo simultaneo.</p>
+<p>Diverso per la ram: non posso allocare più ram di quanta ne possiedo fisicamente, quando configuro una vm. Con i container la distribuzione della ram imposto un limite massimo e ne viene fatto un uso e distribuzione intelligente tra i container.</p>
+<h2 id="ufs-vs-zfs">UFS vs ZFS</h2>
+<p>Sono due file system</p>
+<ul>
+<li>zfs consuma molta ram (la usa come cache del disco), molto accurato per l'integrità dei dati</li>
+<li>ufs è tradizionale, leggero e solido -&gt; fa a caso nostro</li>
+</ul>
+<h2 id="disco">Disco</h2>
+<p>il disco sul quale installeremo il sistema sarà vtbd0 (Virtual I/O Bloc Device 0) -&gt; il kernel di freebsd riconosce di star comunicando con un hypervisor (-&gt;carica driver paravirtualizzato) saltando emulazione.</p>
+<h2 id="novnc">noVNC</h2>
+<p>server headless, soluzione: noVNC, client che mostra a browser che succede.</p>
+<h2 id="creazione-vlan">Creazione VLAN</h2>
+<p>Proxmox ha vlan tag vuoto -&gt; vtnet0 riceve traffico untagged dal router e tagged per il lab.</p>
+<p>Dobbiamo dividere vtnet0 in più interfacce virtuali:</p>
+<ul>
+<li>vtnet_vlan10 ecc...</li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../setup/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../setup/" class="btn btn-xs btn-link">
+        Configurazione: OPNsense (Router on a Stick)
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../Segmentazione_rete/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../Segmentazione_rete/" class="btn btn-xs btn-link">
+        Segmentazione Rete e Firewall (Zero Trust)
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/OPNsense/notions.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>creare maccchina muletto - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "creare maccchina muletto", url: "#_top", children: [
+          ]},
+          {title: "Avviare trasferimento dati", url: "#avviare-trasferimento-dati", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../network/network_map/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../network/network_map/" class="btn btn-xs btn-link">
+        192.168.1.0/24 (WAN / Rete Base Untagged)
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../nas_synology/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../nas_synology/" class="btn btn-xs btn-link">
+        Nas synology
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="creare-maccchina-muletto">creare maccchina muletto</h1>
+<p>Ho un nas pieno che devo svuotare, voglio sfruttare la memoria del minipc, quindi creo un container su proxmox.</p>
+<p>creare un container con debian-13 con 250 gb di memoria e altre impostazioni di default.
+Importante: su general togliere la spunta unpriviledge -&gt; serve che sia priviledge per far andare cifs</p>
+<p>installiamo libreria per parlare con vecchio linguaggio nas e tmux permette di lanciare programmi in bg
+    apt update &amp;&amp; apt install rsync -y
+    apt install openssh-server -y
+    apt install cifs-utils tmux -y</p>
+<p>sblocco porta con: 
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config &amp;&amp; systemctl restart ssh</p>
+<h1 id="avviare-trasferimento-dati">Avviare trasferimento dati</h1>
+<p>avvio tmux sul mio pc e lo sgancio per lasciare lavorare solo container su proxmox e nas
+installare tmux
+lanciarlo con
+    tmux
+fare
+    sudo rsync -avhP -e "ssh -o ServerAliveInterval=60" /mnt/vecchionas/ root@192.168.1.95:/root/backup_nas/</p>
+<p>sganciarsi con ctrl+b e poi d</p>
+<p>Ho avuto molti problemi di blocchi nonostante avessi usato ServerAliveInterval=60, è un'operazione che richiede molto tempo se si spostano molti gb con dispositivi lenti (15mb/s), per questo occorre verificare lo stato ogni tanto e risvegliare il processo rilanciando rsync o ancora meglio non detatchare e mantenere la finestra del terminale aperta per darci uno sguardo ogni tanto.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../network/network_map/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../network/network_map/" class="btn btn-xs btn-link">
+        192.168.1.0/24 (WAN / Rete Base Untagged)
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../nas_synology/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../nas_synology/" class="btn btn-xs btn-link">
+        Nas synology
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/nas/spostamento_file.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

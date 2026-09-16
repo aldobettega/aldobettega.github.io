@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Installazione VM - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Installazione VM", url: "#_top", children: [
+          ]},
+          {title: "Installazione pacchetti", url: "#installazione-pacchetti", children: [
+          ]},
+          {title: "Creazione directory", url: "#creazione-directory", children: [
+          ]},
+          {title: "Installare Czkawka", url: "#installare-czkawka", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../hardware/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../hardware/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../context/context/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../context/context/" class="btn btn-xs btn-link">
+        Documentazione As-Built &amp; To-Be: Architettura HomeLab
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="installazione-vm">Installazione VM</h1>
+<p>Creare un container LXC con
+- OS: ubuntu server / debian 13
+- RAM: 2GB
+- Core: 4
+- Disk: 20GB</p>
+<p>Se ssh non funziona, fare da proxmox:</p>
+<pre><code class="language-shell">sudo apt update &amp;&amp; sudo apt install openssh-server -y
+sudo apt update &amp;&amp; sudo apt install openssh-server -y
+</code></pre>
+<h1 id="installazione-pacchetti">Installazione pacchetti</h1>
+<p>Installare pacchetti necessari:</p>
+<pre><code class="language-shell">sudo apt update &amp;&amp; sudo apt upgrade -y
+sudo apt install cifs-utils curl nano -y
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+</code></pre>
+<h1 id="creazione-directory">Creazione directory</h1>
+<pre><code class="language-shell">sudo mkdir -p /mnt/cartella1
+sudo mkdir -p /mnt/cartella2
+</code></pre>
+<p>Verificare dalla gui del synology in
+    pannello di controllo&gt;servizi file&gt;sbm&gt;impostazioni avanzate
+che sia abilitato a sbm 3.</p>
+<p>Creare file di configurazione per credenziali:
+    <code>nano ~/.smbcredentials</code>
+Inserendo:
+    <code>username=tuo_utente_synology password=tua_password_synology</code>
+e rendendolo non leggibile agli altri utenti della VM:
+    <code>chmod 600 ~/.smbcredentials</code></p>
+<p>Modificare fstab di configurazione:
+    sudo nano /etc/fstab
+Inserendo:</p>
+<pre><code class="language-shell">    //192.168.1.224/cartella1nome /mnt/cartella1 cifs credentials=/home/scanner1/.smbcredentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0 0 0
+    //192.168.1.224/cartella2nome /mnt/cartella2 cifs credentials=/home/scanner1/.smbcredentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0 0 0
+</code></pre>
+<p>Ricaricare con:
+    <code>sudo systemctl daemon-reload</code>
+Montare:
+    <code>sudo mount -a</code>
+Verificare con:</p>
+<pre><code class="language-shell">    ls -l /mnt/cartella1
+    ls -l /mnt/cartella2
+</code></pre>
+<h1 id="installare-czkawka">Installare Czkawka</h1>
+<p>Creare dir per czkawka con docker file</p>
+<pre><code class="language-bash">mkdir ~/czkawka
+cd ~/czkawka
+nano docker-compose.yml
+</code></pre>
+<pre><code class="language-bash">services:
+  czkawka:
+    image: jlesage/czkawka
+    container_name: czkawka
+    ports:
+      - &quot;5800:5800&quot;
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=1000
+      - TZ=Europe/Rome
+    volumes:
+      - ./config:/config:rw
+      - /mnt/cartella1:/storage/cartella1:rw
+      - /mnt/cartella2:/storage/cartella2:rw
+    restart: unless-stopped
+</code></pre>
+<p>Avviare con:
+    <code>sudo docker compose up -d</code></p>
+<p>Accedere alla gui con:
+    <code>192.168.1.198:5800</code></p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../hardware/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../hardware/" class="btn btn-xs btn-link">
+        Index
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../context/context/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../context/context/" class="btn btn-xs btn-link">
+        Documentazione As-Built &amp; To-Be: Architettura HomeLab
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/czkawka/setup.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

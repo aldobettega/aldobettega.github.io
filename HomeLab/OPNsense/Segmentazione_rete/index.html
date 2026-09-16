@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Segmentazione Rete e Firewall (Zero Trust) - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Segmentazione Rete e Firewall (Zero Trust)", url: "#_top", children: [
+              {title: "1. Segmentazione Logica (VLAN)", url: "#1-segmentazione-logica-vlan" },
+              {title: "2. Configurazione Servizi DHCP (Kea)", url: "#2-configurazione-servizi-dhcp-kea" },
+              {title: "3. Configurazione Firewall (Zero Trust Base)", url: "#3-configurazione-firewall-zero-trust-base" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../notions/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../notions/" class="btn btn-xs btn-link">
+        Nozioni
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../Immich/setup/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../Immich/setup/" class="btn btn-xs btn-link">
+        Creare la VM
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="segmentazione-rete-e-firewall-zero-trust">Segmentazione Rete e Firewall (Zero Trust)</h1>
+<h2 id="1-segmentazione-logica-vlan">1. Segmentazione Logica (VLAN)</h2>
+<h3 id="11-creazione-dei-tag-vlan">1.1 Creazione dei Tag VLAN</h3>
+<p>Dividiamo la rete dell'homelab in sottoreti virtuali (VLAN). Questo consente di isolare il traffico per rendere l'infrastruttura sicura e manutenibile.
+Per gestirle accedere a <strong>OPNsense &gt; Interfaces &gt; Other Types &gt; VLAN</strong>.</p>
+<p>Creare le seguenti reti:
+- <strong>VLAN 1 (Transit/WAN):</strong> Rete casalinga del Fritzbox, ospita l'interfaccia di emergenza di Proxmox.
+- <strong>VLAN 10 (Management):</strong> Contiene dispositivi di infrastruttura di rete (router, switch, access point, DNS).
+- <strong>VLAN 20 (Servers &amp; Storage):</strong> Contiene i servizi offerti dall'homelab (Nginx, Jellyfin, Immich, NAS).
+- <strong>VLAN 30 (Trusted):</strong> Rete privilegiata per amministratori.
+- <strong>VLAN 40 (Guests / Users):</strong> Rete per utenti Wi-Fi isolata dal resto dell'infrastruttura.</p>
+<p><em>(Inserire qui lo screenshot <code>image.png</code>)</em></p>
+<h3 id="12-assegnazione-delle-interfacce">1.2 Assegnazione delle Interfacce</h3>
+<p>Dopo aver creato i tag 802.1Q, occorre trasformarli in interfacce di rete gestibili navigando su <strong>OPNsense &gt; Interfaces &gt; Assignments</strong>.</p>
+<p><em>(Inserire qui lo screenshot <code>image-1.png</code>)</em></p>
+<h3 id="13-configurazione-degli-ip-gateway-delle-vlan">1.3 Configurazione degli IP (Gateway delle VLAN)</h3>
+<p>Ora su <strong>OPNsense &gt; Interfaces</strong> compariranno le nuove VLAN nel menu laterale. Selezionarle una ad una per assegnare un IPv4, che rappresenterà il Gateway di OPNsense su quella specifica sottorete.
+Per ogni VLAN impostare:
+- <strong>Enable Interface:</strong> (Spuntato)
+- <strong>IPv4 Configuration Type:</strong> Static IPv4
+- <strong>IPv4 Address:</strong> L'indirizzo del gateway (es. <code>10.0.10.1/24</code>, <code>10.0.20.1/24</code>, ecc.)</p>
+<hr />
+<h2 id="2-configurazione-servizi-dhcp-kea">2. Configurazione Servizi DHCP (Kea)</h2>
+<p>Creiamo i pool DHCP: range di indirizzi assegnati in automatico ai dispositivi che si connettono.
+Navigare su <strong>OPNsense &gt; Services &gt; Kea DHCP &gt; Kea DHCPv4 &gt; Subnets</strong> (oppure ISC DHCP se non siete ancora passati a Kea).</p>
+<ul>
+<li><strong>Pool per VLAN 10 (Management):</strong></li>
+<li>Subnet: <code>10.0.10.0/24</code></li>
+<li>Range: <code>10.0.10.100 - 10.0.10.200</code></li>
+<li><strong>Pool per VLAN 30 (Trusted):</strong></li>
+<li>Subnet: <code>10.0.30.0/24</code></li>
+<li>Range: <code>10.0.30.50 - 10.0.30.200</code></li>
+<li><strong>Pool per VLAN 40 (Guests):</strong></li>
+<li>Subnet: <code>10.0.40.0/24</code></li>
+<li>Range: <code>10.0.40.50 - 10.0.40.200</code></li>
+</ul>
+<p><em>(Nota: I NAS e i server sulla VLAN 20 non necessitano di un pool DHCP dinamico, poiché richiedono IP statici per garantire affidabilità ai servizi e ai mount di rete).</em></p>
+<p>Salvare e <strong>riavviare il servizio DHCP</strong>.</p>
+<hr />
+<h2 id="3-configurazione-firewall-zero-trust-base">3. Configurazione Firewall (Zero Trust Base)</h2>
+<p>Di default, OPNsense blocca tutto il traffico in entrata sulle nuove interfacce. Dobbiamo creare delle regole navigando su <strong>OPNsense &gt; Firewall &gt; Rules &gt; [Nome Interfaccia]</strong>.</p>
+<h3 id="regola-per-trusted-vlan-30-allow-all">Regola per TRUSTED (VLAN 30) - Allow All</h3>
+<p>Questa impostazione permissiva permette alla rete fidata degli amministratori di uscire su internet e di raggiungere le altre VLAN per gestire i server.
+- <strong>Action:</strong> Pass
+- <strong>Protocol:</strong> Any
+- <strong>Source:</strong> <code>Trusted net</code>
+- <strong>Destination:</strong> Any</p>
+<h3 id="regole-per-guests-vlan-40-isolamento-zero-trust">Regole per GUESTS (VLAN 40) - Isolamento Zero Trust</h3>
+<p><em>Attenzione: Non usare MAI un banale "Allow All" sulla rete ospiti! I dispositivi IoT o i telefoni degli ospiti compromessi potrebbero attaccare i vostri server.</em>
+Per farli navigare su Internet ma bloccarli dalle reti private, occorre prima creare un Alias (es. <code>RFC1918</code> contenente le reti locali <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>) sotto <em>Firewall &gt; Aliases</em>, e poi creare due regole in ordine:</p>
+<ol>
+<li><strong>Regola 1 (Blocco verso il Lab):</strong></li>
+<li><strong>Action:</strong> Block</li>
+<li><strong>Protocol:</strong> Any</li>
+<li><strong>Source:</strong> <code>Guests net</code></li>
+<li><strong>Destination:</strong> Alias <code>RFC1918</code> (Le tue reti private)</li>
+<li><strong>Regola 2 (Accesso a Internet):</strong></li>
+<li><strong>Action:</strong> Pass</li>
+<li><strong>Protocol:</strong> Any</li>
+<li><strong>Source:</strong> <code>Guests net</code></li>
+<li><strong>Destination:</strong> Any</li>
+</ol>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../notions/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../notions/" class="btn btn-xs btn-link">
+        Nozioni
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../Immich/setup/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../Immich/setup/" class="btn btn-xs btn-link">
+        Creare la VM
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/OPNsense/Segmentazione_rete.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

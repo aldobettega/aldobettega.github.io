@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Formattazione NAS D-Link - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Formattazione NAS D-Link", url: "#_top", children: [
+          ]},
+          {title: "Inserimento nel Lab (VLAN 20 - Storage)", url: "#inserimento-nel-lab-vlan-20-storage", children: [
+          ]},
+          {title: "Risoluzione Problemi NTLMv1 (Workaround SMB1)", url: "#risoluzione-problemi-ntlmv1-workaround-smb1", children: [
+          ]},
+          {title: "Connessione e Mount Permanente su Proxmox", url: "#connessione-e-mount-permanente-su-proxmox", children: [
+              {title: "1. Creazione Interfaccia Virtuale (VLAN 20) su Proxmox", url: "#1-creazione-interfaccia-virtuale-vlan-20-su-proxmox" },
+              {title: "2. Mount tramite fstab", url: "#2-mount-tramite-fstab" },
+              {title: "3. Aggiungere lo Storage alla WebGUI di Proxmox", url: "#3-aggiungere-lo-storage-alla-webgui-di-proxmox" },
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../nas_synology/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../nas_synology/" class="btn btn-xs btn-link">
+        Nas synology
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../backup_job/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../backup_job/" class="btn btn-xs btn-link">
+        Backup NAS
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="formattazione-nas-d-link">Formattazione NAS D-Link</h1>
+<p>Un disco era rotto, quindi occorre implementare l'impostazione single disk. Sulle impostazioni del mio D-Link sono andato su <strong>Tools &gt; RAID</strong>.</p>
+<h1 id="inserimento-nel-lab-vlan-20-storage">Inserimento nel Lab (VLAN 20 - Storage)</h1>
+<p><em>Nota: A causa di limitazioni hardware e timeout del client DHCP interno al dispositivo D-Link quando interfacciato con porte switch in modalità VLAN Access, il NAS fallisce l'acquisizione dinamica dell'IP. È obbligatorio bypassare il DHCP di OPNsense e configurarlo con un IP statico.</em></p>
+<ol>
+<li>
+<p><strong>Assegnazione IP Statico (dalla GUI del NAS):</strong></p>
+<ul>
+<li><strong>IP Address:</strong> <code>10.0.20.50</code></li>
+<li><strong>Subnet Mask:</strong> <code>255.255.255.0</code></li>
+<li><strong>Gateway:</strong> <code>10.0.20.1</code> (OPNsense)</li>
+<li><strong>DNS:</strong> <code>10.0.10.4</code> (Pi-hole)</li>
+</ul>
+</li>
+<li>
+<p><strong>Configurazione Switch TP-Link (Porta 2):</strong></p>
+<ul>
+<li><strong>VLAN &gt; 802.1Q VLAN:</strong> Inserire VLAN ID = 20 (Rete Servers) e impostare la Porta 2 (dove è collegato il NAS) su <strong>Untagged</strong>. Salvare.</li>
+<li><strong>VLAN &gt; 802.1Q PVID Setting:</strong> Inserire PVID = 20 e applicarlo alla Porta 2. Salvare.</li>
+</ul>
+</li>
+</ol>
+<h1 id="risoluzione-problemi-ntlmv1-workaround-smb1">Risoluzione Problemi NTLMv1 (Workaround SMB1)</h1>
+<p>I NAS vecchi usano protocolli obsoleti (SMB 1.0) e sistemi di crittografia password (NTLMv1) che i kernel Linux moderni di Proxmox hanno rimosso di default per ragioni di sicurezza. Per evitare l'errore <code>Permission denied</code> in fase di mount, la soluzione più pratica in un ambiente domestico sicuro (essendo il NAS isolato in VLAN 20) è eliminare l'autenticazione tramite password.</p>
+<ol>
+<li>Entra nel pannello web del NAS (<code>10.0.20.50</code>).</li>
+<li>Nelle impostazioni della cartella condivisa (es. <code>Volume_1</code>), imposta i permessi su <strong>Guest Access</strong> (oppure User: All) con diritti di <strong>Lettura/Scrittura</strong>. In questo modo non sarà richiesta alcuna password per l'accesso.</li>
+</ol>
+<h1 id="connessione-e-mount-permanente-su-proxmox">Connessione e Mount Permanente su Proxmox</h1>
+<p>Poiché il NAS si trova nella VLAN 20 e l'host Proxmox risiede nella VLAN 1 (per ragioni di management d'emergenza), occorre creare un'interfaccia virtuale su Proxmox per permettere la comunicazione diretta in Layer 2 (senza appesantire il firewall virtuale di OPNsense con traffico di routing pesante).</p>
+<h3 id="1-creazione-interfaccia-virtuale-vlan-20-su-proxmox">1. Creazione Interfaccia Virtuale (VLAN 20) su Proxmox</h3>
+<ol>
+<li>Dalla GUI di Proxmox, andare su <strong>System &gt; Network</strong>.</li>
+<li>Cliccare su <strong>Create &gt; Linux VLAN</strong>:<ul>
+<li><strong>Name:</strong> <code>vmbr0.20</code></li>
+<li><strong>IPv4/CIDR:</strong> <code>10.0.20.100/24</code> <em>(IP assegnato a Proxmox nella VLAN Storage)</em></li>
+<li><strong>Gateway:</strong> <em>Lasciare rigorosamente vuoto!</em> <em>(Proxmox ha già il router ISP come gateway predefinito).</em></li>
+</ul>
+</li>
+<li>Cliccare <strong>Apply Configuration</strong>.</li>
+</ol>
+<h3 id="2-mount-tramite-fstab">2. Mount tramite fstab</h3>
+<p>Apri la Shell di Proxmox e digita:</p>
+<ol>
+<li>Crea la cartella di destinazione:
+   <code>mkdir -p /mnt/NAS_Backup</code></li>
+<li>Apri il file degli hard disk di sistema:
+   <code>nano /etc/fstab</code></li>
+<li>Aggiungi questa riga alla fine del file per forzare il vecchio protocollo <code>vers=1.0</code> all'avvio e puntare al nuovo IP:
+   <code>//10.0.20.50/Volume_1 /mnt/NAS_Backup cifs guest,vers=1.0,iocharset=utf8 0 0</code></li>
+<li>Salva (Ctrl+O, Invio) ed esci (Ctrl+X).</li>
+<li>Monta il disco immediatamente per testarlo:
+   <code>mount -a</code></li>
+</ol>
+<h3 id="3-aggiungere-lo-storage-alla-webgui-di-proxmox">3. Aggiungere lo Storage alla WebGUI di Proxmox</h3>
+<p>Ora che Linux vede il NAS come un disco interno, diciamo all'hypervisor Proxmox di usarlo:</p>
+<ol>
+<li>Vai su <strong>Datacenter &gt; Storage</strong>.</li>
+<li>Clicca su <strong>Add &gt; Directory</strong> <em>(Importante: Non usare la voce SMB/CIFS nativa di Proxmox!)</em>.</li>
+<li>Compila in questo modo:<ul>
+<li><strong>ID:</strong> <code>NAS_Backup</code></li>
+<li><strong>Directory:</strong> <code>/mnt/NAS_Backup</code></li>
+<li><strong>Content:</strong> Selezionare <strong>VZDump backup file</strong> (per i backup delle VM) e/o <strong>ISO image</strong>.</li>
+</ul>
+</li>
+<li>Clicca su <strong>Add</strong>.</li>
+</ol>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../nas_synology/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../nas_synology/" class="btn btn-xs btn-link">
+        Nas synology
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../backup_job/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../backup_job/" class="btn btn-xs btn-link">
+        Backup NAS
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/nas/configurazione_iniziale.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

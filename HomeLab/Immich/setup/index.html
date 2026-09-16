@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Creare la VM - My Docs</title>
+    <link href="../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Creare la VM", url: "#_top", children: [
+          ]},
+          {title: "Installazione debian", url: "#installazione-debian", children: [
+              {title: "1. Lingua e Tastiera", url: "#1-lingua-e-tastiera" },
+              {title: "2. Configurazione di Rete", url: "#2-configurazione-di-rete" },
+              {title: "3. Utenti e Password", url: "#3-utenti-e-password" },
+              {title: "4. Partizionamento Dischi (Cruciale)", url: "#4-partizionamento-dischi-cruciale" },
+              {title: "5. Configurazione del Package Manager (Apt)", url: "#5-configurazione-del-package-manager-apt" },
+              {title: "6. Selezione del Software (Il passaggio pi\u00f9 importante)", url: "#6-selezione-del-software-il-passaggio-piu-importante" },
+              {title: "7. Installazione del Bootloader (GRUB)", url: "#7-installazione-del-bootloader-grub" },
+          ]},
+          {title: "Primo accesso e montaggio NAS d-link", url: "#primo-accesso-e-montaggio-nas-d-link", children: [
+          ]},
+          {title: "Predisposizione immich", url: "#predisposizione-immich", children: [
+          ]},
+          {title: "Accedere ad immich", url: "#accedere-ad-immich", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../../js/base.js"></script>
+      <script src="../../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../OPNsense/Segmentazione_rete/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../OPNsense/Segmentazione_rete/" class="btn btn-xs btn-link">
+        Segmentazione Rete e Firewall (Zero Trust)
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../" class="btn btn-xs btn-link">
+        Home
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h1 id="creare-la-vm">Creare la VM</h1>
+<p>Per un servizio come Immich occorre una VM.
+Scarichiamo da https://www.debian.org/CD/netinst/ la <a href="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.6.0-amd64-netinst.iso">amd64</a>.</p>
+<h1 id="installazione-debian">Installazione debian</h1>
+<h3 id="1-lingua-e-tastiera">1. Lingua e Tastiera</h3>
+<ul>
+<li><strong>Lingua (Language):</strong> Ti consiglio vivamente di scegliere <strong>English</strong>. Avere un server in inglese ti salverà la vita se in futuro dovrai cercare su Google eventuali messaggi di errore.</li>
+<li><strong>Paese (Country):</strong> Seleziona <strong>Other -&gt; Europe -&gt; Italy</strong> (serve per il fuso orario).</li>
+<li><strong>Tastiera (Keymap):</strong> Qui seleziona <strong>Italian</strong> (o quella corrispondente alla tastiera fisica con cui stai digitando, per evitare di impazzire con i caratteri speciali).</li>
+</ul>
+<h3 id="2-configurazione-di-rete">2. Configurazione di Rete</h3>
+<ul>
+<li><strong>Hostname:</strong> Inserisci un nome chiaro per riconoscerlo nel tuo router OPNsense, ad esempio <code>immich-server</code>.</li>
+<li><strong>Domain name:</strong> Se nel tuo Unbound DNS su OPNsense hai configurato un dominio locale (es. <code>home.arpa</code> o <code>lab.local</code>), inseriscilo. Se non lo hai fatto o non lo ricordi, <strong>lascia il campo completamente vuoto</strong> e vai avanti.</li>
+</ul>
+<h3 id="3-utenti-e-password">3. Utenti e Password</h3>
+<ul>
+<li><strong>Root password:</strong> Scegli una password forte per l'utente "Dio" del sistema (root).</li>
+<li><strong>Nome del nuovo utente (Full name &amp; Username):</strong> Crea il tuo utente principale (es. il tuo nome o <code>homelab</code>). <em>Evita di usare nomi banali come <code>admin</code> o <code>user</code> per questioni di sicurezza</em>.</li>
+<li><strong>Password dell'utente:</strong> Inserisci la password per questo utente (la userai spesso per connetterti via SSH).</li>
+</ul>
+<h3 id="4-partizionamento-dischi-cruciale">4. Partizionamento Dischi (Cruciale)</h3>
+<p>Dato che stiamo operando su un disco virtuale (quello da 32-50GB che hai creato sull'NVMe), la configurazione è semplicissima:</p>
+<ul>
+<li>Scegli <strong>Guided - use entire disk</strong> (Guidato - usa l'intero disco).</li>
+<li>Seleziona l'unico disco che ti viene mostrato (probabilmente si chiamerà <code>vda</code> o <code>sda</code>).</li>
+<li>Schema di partizionamento: Scegli <strong>All files in one partition</strong> (Tutti i file in una partizione - raccomandato per i nuovi utenti). Per Docker va benissimo così.</li>
+<li>Seleziona <strong>Finish partitioning and write changes to disk</strong> e rispondi <strong>Yes</strong> alla schermata successiva di conferma.</li>
+</ul>
+<h3 id="5-configurazione-del-package-manager-apt">5. Configurazione del Package Manager (Apt)</h3>
+<ul>
+<li>Ti chiederà se vuoi scansionare altri CD/DVD: rispondi <strong>No</strong>.</li>
+<li><strong>Debian archive mirror country:</strong> Seleziona <strong>Italy</strong>.</li>
+<li><strong>Debian archive mirror:</strong> Seleziona <strong>deb.debian.org</strong> (è il più veloce e stabile).</li>
+<li><strong>HTTP Proxy:</strong> Lascia il campo <strong>vuoto</strong> e continua.</li>
+<li><em>Partecipazione al sondaggio sull'uso dei pacchetti (popularity-contest):</em> Rispondi <strong>No</strong>.</li>
+</ul>
+<h3 id="6-selezione-del-software-il-passaggio-piu-importante">6. Selezione del Software (Il passaggio più importante)</h3>
+<p>Arriverai a una schermata con una lista di componenti (Software selection). Muoviti con le frecce su/giù e usa la <strong>Barra Spaziatrice</strong> per mettere o togliere gli asterischi <code>[*]</code>:</p>
+<ul>
+<li><strong>TOGLI</strong> l'asterisco da <em>Debian desktop environment</em></li>
+<li><strong>TOGLI</strong> l'asterisco da <em>GNOME</em> (o Xfce/KDE, non deve esserci nulla che riguarda l'interfaccia grafica).</li>
+<li><strong>METTI</strong> l'asterisco su <strong>SSH server</strong> (Fondamentale! Ti permetterà di usare il terminale dal tuo PC principale).</li>
+<li><strong>METTI</strong> l'asterisco su <strong>Standard system utilities</strong>.</li>
+<li>Vai su <em>Continue</em> (tasto Tab, poi Invio).</li>
+</ul>
+<h3 id="7-installazione-del-bootloader-grub">7. Installazione del Bootloader (GRUB)</h3>
+<ul>
+<li>Ti chiederà se vuoi installare il boot loader GRUB sul disco primario: rispondi <strong>Yes</strong>.</li>
+<li>Nella schermata successiva, <strong>non scegliere "Enter device manually"</strong>, ma seleziona il disco fisico mostrato nella lista (es. <code>/dev/vda</code>).</li>
+</ul>
+<p>A questo punto l'installazione finirà. Ti chiederà di riavviare (Continue). La VM si riavvierà e, invece di un'interfaccia grafica, ti troverai davanti a una schermata nera con la scritta <code>immich-server login:</code>.</p>
+<h1 id="primo-accesso-e-montaggio-nas-d-link">Primo accesso e montaggio NAS d-link</h1>
+<ol>
+<li>accedere in ssh con l'utente base</li>
+<li>diventare root con su -</li>
+<li>installare pacchetti necessari: apt update &amp;&amp; apt install sudo cifs-utils nano -y</li>
+<li>abilitare utente base per il futuro: /sbin/usermod -aG sudo immich-user</li>
+<li>creare dir di montaggio: mkdir -p /mnt/immich_photos</li>
+<li>configurazioni per vecchio nas:</li>
+<li>nano /etc/fstab</li>
+<li>aggiungere alla fine
+        //10.0.20.50/Volume_1 /mnt/immich_photos cifs guest,vers=1.0,iocharset=utf8,_netdev 0 0</li>
+<li>montare: mount -a</li>
+<li>verificare se il nas sia montato: df -h</li>
+</ol>
+<h1 id="predisposizione-immich">Predisposizione immich</h1>
+<ol>
+<li>Installare docker
+    curl -fsSL https://get.docker.com -o get-docker.sh sh get-docker.sh</li>
+<li>creare cartella applicazione
+    mkdir -p /opt/immich
+    cd /opt/immich</li>
+<li>Scaricare file di immich
+    wget -O docker-compose.yml https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
+    wget -O .env https://github.com/immich-app/immich/releases/latest/download/example.env</li>
+<li>Dire ad immich che lo storage è il nas
+    nano .env
+    mettere in UPLOAD_LOCATION /mnt/immich_photos</li>
+<li>avviare il server
+    docker compose up -d</li>
+</ol>
+<h1 id="accedere-ad-immich">Accedere ad immich</h1>
+<ol>
+<li>accedere da browser all'ip della vm sulla porta 2283 e creare un account</li>
+<li>scaricare app sul telefono e abilitare backup automatico delle cartelle</li>
+</ol>
+<p>Per accedere ad immich occorre connettersi alla vm: per farlo all'esterno della rete dell'homelab o fuori casa occorre usare strumenti come tailscale.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../OPNsense/Segmentazione_rete/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../OPNsense/Segmentazione_rete/" class="btn btn-xs btn-link">
+        Segmentazione Rete e Firewall (Zero Trust)
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../../" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../../" class="btn btn-xs btn-link">
+        Home
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+      <p>
+        <a href="https://github.com/aldobettega/HomeLab/edit/main/docs/Immich/setup.md">Edit on None</a>
+      </p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>
